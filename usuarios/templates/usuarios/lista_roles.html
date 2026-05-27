@@ -1,0 +1,163 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Roles{% endblock %}
+
+{% block content %}
+    <div class="card shadow p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Roles</h2>
+            <div class="d-flex gap-2">
+                <a href="{% url 'lista_usuarios' %}" class="btn btn-outline-dark"><i class="bi bi-people me-1"></i>Usuarios</a>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarRol">
+                    + Nuevo Rol
+                </button>
+            </div>
+        </div>
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Facturas</th>
+                    <th>Cotizaciones</th>
+                    <th>Catálogo</th>
+                    <th>Editar</th>
+                    <th>Eliminar</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rol in roles %}
+                <tr>
+                    <td>{{ rol.nombre }}</td>
+                    <td>{{ rol.descripcion|default:"—" }}</td>
+                    <td>{% if rol.puede_ver_facturas %}<i class="bi bi-check-circle text-success"></i>{% else %}<i class="bi bi-x-circle text-danger"></i>{% endif %}</td>
+                    <td>{% if rol.puede_ver_cotizaciones %}<i class="bi bi-check-circle text-success"></i>{% else %}<i class="bi bi-x-circle text-danger"></i>{% endif %}</td>
+                    <td>
+                        <div class="d-flex flex-wrap gap-1">
+                            {% if rol.puede_ver_clientes %}<span class="badge bg-success">Clientes</span>{% else %}<span class="badge bg-secondary">Clientes</span>{% endif %}
+                            {% if rol.puede_ver_productos %}<span class="badge bg-success">Productos</span>{% else %}<span class="badge bg-secondary">Productos</span>{% endif %}
+                            {% if rol.puede_ver_servicios %}<span class="badge bg-success">Servicios</span>{% else %}<span class="badge bg-secondary">Servicios</span>{% endif %}
+                            {% if rol.puede_ver_directorio %}<span class="badge bg-success">Directorio</span>{% else %}<span class="badge bg-secondary">Directorio</span>{% endif %}
+                            {% if rol.puede_ver_agentes %}<span class="badge bg-success">Agentes</span>{% else %}<span class="badge bg-secondary">Agentes</span>{% endif %}
+                            {% if rol.puede_ver_cuentas %}<span class="badge bg-success">Cuentas</span>{% else %}<span class="badge bg-secondary">Cuentas</span>{% endif %}
+                        </div>
+                    </td>
+                    <td>{% if rol.puede_editar %}<i class="bi bi-check-circle text-success"></i>{% else %}<i class="bi bi-x-circle text-danger"></i>{% endif %}</td>
+                    <td>{% if rol.puede_eliminar %}<i class="bi bi-check-circle text-success"></i>{% else %}<i class="bi bi-x-circle text-danger"></i>{% endif %}</td>
+                    <td>
+                        <a href="{% url 'editar_rol' rol.pk %}" class="btn btn-warning btn-sm">Editar</a>
+                        <a href="{% url 'eliminar_rol' rol.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal Agregar Rol -->
+    <div class="modal fade" id="modalAgregarRol" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Nuevo Rol</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="post" action="{% url 'agregar_rol' %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Nombre del Rol</label>
+                                {{ form.nombre }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Descripción</label>
+                                {{ form.descripcion }}
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Módulos principales</label>
+                                <div class="row g-2 mt-1">
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            {{ form.puede_ver_facturas }}
+                                            <label class="form-check-label">Ver Facturas</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            {{ form.puede_ver_cotizaciones }}
+                                            <label class="form-check-label">Ver Cotizaciones</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Catálogo</label>
+                                <div class="row g-2 mt-1">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            {{ form.puede_ver_clientes }}
+                                            <label class="form-check-label">Clientes</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            {{ form.puede_ver_productos }}
+                                            <label class="form-check-label">Productos</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            {{ form.puede_ver_servicios }}
+                                            <label class="form-check-label">Servicios</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            {{ form.puede_ver_directorio }}
+                                            <label class="form-check-label">Directorio</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            {{ form.puede_ver_agentes }}
+                                            <label class="form-check-label">Agentes de Venta</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            {{ form.puede_ver_cuentas }}
+                                            <label class="form-check-label">Cuentas Bancarias</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Acciones</label>
+                                <div class="row g-2 mt-1">
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            {{ form.puede_editar }}
+                                            <label class="form-check-label">Puede Editar</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            {{ form.puede_eliminar }}
+                                            <label class="form-check-label">Puede Eliminar</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

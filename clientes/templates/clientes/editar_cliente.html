@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Editar Cliente{% endblock %}
+
+{% block content %}
+    <div class="card shadow p-4" style="max-width: 600px; margin: auto;">
+        <h2 class="mb-4">Editar Cliente</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-warning w-100 mt-3">Guardar Cambios</button>
+        </form>
+        <a href="{% url 'lista_clientes' %}" class="btn btn-secondary w-100 mt-2">Cancelar</a>
+    </div>
+{% endblock %}

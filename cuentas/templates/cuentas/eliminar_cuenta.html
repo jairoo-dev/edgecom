@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Eliminar Cuenta Bancaria{% endblock %}
+
+{% block content %}
+    <div class="card shadow p-4 text-center" style="max-width: 500px; margin: auto;">
+        <h2 class="mb-3">¿Eliminar cuenta bancaria?</h2>
+        <p class="mb-4">¿Estás seguro que deseas eliminar la cuenta de <strong>{{ cuenta.banco }}</strong> — {{ cuenta.beneficiario }}?</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger w-100">Sí, eliminar</button>
+        </form>
+        <a href="{% url 'lista_cuentas' %}" class="btn btn-secondary w-100 mt-2">Cancelar</a>
+    </div>
+{% endblock %}

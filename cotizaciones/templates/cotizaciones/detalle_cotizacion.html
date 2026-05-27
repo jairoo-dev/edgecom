@@ -1,0 +1,173 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Cotización {{ cotizacion.folio }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Cotización {{ cotizacion.folio }}</h2>
+    <div class="d-flex gap-2">
+        <a href="{% url 'editar_cotizacion' cotizacion.folio %}" class="btn btn-warning"><i class="bi bi-pencil me-1"></i>Editar</a>
+        <a href="{% url 'lista_cotizaciones' %}" class="btn btn-secondary"><i class="bi bi-arrow-left me-1"></i>Regresar</a>
+        <a href="{% url 'generar_pdf' cotizacion.folio %}" class="btn btn-success" target="_blank"><i class="bi bi-file-earmark-pdf me-1"></i>Exportar PDF</a>
+    </div>
+</div>
+
+<!-- Información General -->
+<div class="card shadow-sm p-4 mb-4">
+    <h5 class="fw-bold mb-3">Información General</h5>
+    <div class="row g-3">
+        <div class="col-md-3">
+            <p class="text-muted small mb-1">Folio</p>
+            <p class="fw-bold">{{ cotizacion.folio }}</p>
+        </div>
+        <div class="col-md-3">
+            <p class="text-muted small mb-1">Fecha</p>
+            <p class="fw-bold">{{ cotizacion.fecha }}</p>
+        </div>
+        <div class="col-md-3">
+            <p class="text-muted small mb-1">Status</p>
+            <p class="fw-bold">{{ cotizacion.get_status_display }}</p>
+        </div>
+        <div class="col-md-3">
+            <p class="text-muted small mb-1">Moneda</p>
+            <p class="fw-bold">{{ cotizacion.moneda }}</p>
+        </div>
+        <div class="col-md-3">
+            <p class="text-muted small mb-1">RFC Cliente</p>
+            <p class="fw-bold">{{ cotizacion.rfc_id }}</p>
+        </div>
+        <div class="col-md-3">
+            <p class="text-muted small mb-1">Razón Social</p>
+            <p class="fw-bold">{{ cotizacion.rfc.razon_social }}</p>
+        </div>
+        <div class="col-md-3">
+            <p class="text-muted small mb-1">Código Postal</p>
+            <p class="fw-bold">{{ cotizacion.rfc.codigo_postal }}</p>
+        </div>
+        <div class="col-md-3">
+            <p class="text-muted small mb-1">Régimen Fiscal</p>
+            <p class="fw-bold">{{ cotizacion.rfc.regimen_fiscal }}</p>
+        </div>
+        {% if cotizacion.contacto %}
+        <div class="col-md-3">
+            <p class="text-muted small mb-1">Contacto</p>
+            <p class="fw-bold">{{ cotizacion.contacto.nombre }}</p>
+        </div>
+        <div class="col-md-3">
+            <p class="text-muted small mb-1">Puesto</p>
+            <p class="fw-bold">{{ cotizacion.contacto.puesto }}</p>
+        </div>
+        <div class="col-md-3">
+            <p class="text-muted small mb-1">Teléfono Contacto</p>
+            <p class="fw-bold">{{ cotizacion.contacto.telefono }}</p>
+        </div>
+        <div class="col-md-3">
+            <p class="text-muted small mb-1">Email Contacto</p>
+            <p class="fw-bold">{{ cotizacion.contacto.email }}</p>
+        </div>
+        {% endif %}
+        {% if cotizacion.agente %}
+        <div class="col-md-3">
+            <p class="text-muted small mb-1">Agente de Venta</p>
+            <p class="fw-bold">{{ cotizacion.agente.nombre }}</p>
+        </div>
+        <div class="col-md-3">
+            <p class="text-muted small mb-1">Teléfono Agente</p>
+            <p class="fw-bold">{{ cotizacion.agente.telefono }}</p>
+        </div>
+        <div class="col-md-3">
+            <p class="text-muted small mb-1">Email Agente</p>
+            <p class="fw-bold">{{ cotizacion.agente.email }}</p>
+        </div>
+        {% endif %}
+        {% if cotizacion.solicitud %}
+        <div class="col-md-12">
+            <p class="text-muted small mb-1">Solicitud</p>
+            <p class="fw-bold">{{ cotizacion.solicitud }}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Conceptos -->
+<div class="card shadow-sm p-4 mb-4">
+    <h5 class="fw-bold mb-3">Conceptos</h5>
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>SKU</th>
+                <th>Clave SAT</th>
+                <th>Unidad SAT</th>
+                <th>Descripción</th>
+                <th>Cantidad</th>
+                <th>Precio Unit.</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detalle in detalles %}
+            <tr>
+                <td>{{ detalle.sku }}</td>
+                <td>{{ detalle.clave_sat }}</td>
+                <td>{{ detalle.unidad_sat }}</td>
+                <td>{{ detalle.descripcion }}</td>
+                <td>{{ detalle.cantidad|floatformat:2 }}</td>
+                <td>${{ detalle.precio_unitario|floatformat:2 }}</td>
+                <td>${{ detalle.subtotal|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Totales -->
+    <div class="row justify-content-end mt-3">
+        <div class="col-md-4">
+            <table class="table table-sm">
+                <tr>
+                    <td class="text-muted">Base:</td>
+                    <td class="text-end fw-bold">${{ base|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">IVA ({{ cotizacion.iva }}%):</td>
+                    <td class="text-end fw-bold">${{ monto_iva|floatformat:2 }}</td>
+                </tr>
+                <tr class="table-dark">
+                    <td class="fw-bold">Total:</td>
+                    <td class="text-end fw-bold">${{ cotizacion.total|floatformat:2 }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Condiciones Comerciales -->
+<div class="card shadow-sm p-4 mb-4">
+    <h5 class="fw-bold mb-3">Condiciones Comerciales</h5>
+    <div class="row g-3">
+        <div class="col-md-3">
+            <p class="text-muted small mb-1">Forma de Pago</p>
+            <p class="fw-bold">{{ cotizacion.get_forma_pago_display|default:"—" }}</p>
+        </div>
+        <div class="col-md-3">
+            <p class="text-muted small mb-1">Vigencia</p>
+            <p class="fw-bold">{{ cotizacion.get_vigencia_display|default:"—" }}</p>
+        </div>
+        <div class="col-md-3">
+            <p class="text-muted small mb-1">Tiempo de Entrega</p>
+            <p class="fw-bold">{{ cotizacion.get_tiempo_entrega_display|default:"—" }}</p>
+        </div>
+        <div class="col-md-3">
+            <p class="text-muted small mb-1">Lugar de Entrega</p>
+            <p class="fw-bold">{{ cotizacion.lugar_entrega|default:"—" }}</p>
+        </div>
+    </div>
+</div>
+
+{% if cotizacion.notas %}
+<div class="card shadow-sm p-4 mb-4">
+    <h5 class="fw-bold mb-3">Notas</h5>
+    <p>{{ cotizacion.notas }}</p>
+</div>
+{% endif %}
+
+{% endblock %}

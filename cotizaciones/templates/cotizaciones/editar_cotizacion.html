@@ -1,0 +1,298 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Editar Cotización{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Editar Cotización — {{ cotizacion.folio }}</h2>
+    <a href="{% url 'lista_cotizaciones' %}" class="btn btn-secondary"><i class="bi bi-arrow-left me-1"></i>Regresar</a>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="total_calculado" id="total_calculado">
+
+    <!-- Sección Principal -->
+    <div class="card shadow-sm p-4 mb-4">
+        <h5 class="fw-bold mb-3">Información General</h5>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Cliente (RFC)</label>
+                {{ form.rfc }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Razón Social</label>
+                <input type="text" class="form-control" id="razon_social" value="{{ cotizacion.rfc.razon_social }}" readonly>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Código Postal</label>
+                <input type="text" class="form-control" id="codigo_postal" value="{{ cotizacion.rfc.codigo_postal }}" readonly>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Contacto</label>
+                {{ form.contacto }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Nombre Contacto</label>
+                <input type="text" class="form-control" id="nombre_contacto" value="{% if cotizacion.contacto %}{{ cotizacion.contacto.nombre }}{% endif %}" readonly>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Puesto Contacto</label>
+                <input type="text" class="form-control" id="puesto_contacto" value="{% if cotizacion.contacto %}{{ cotizacion.contacto.puesto }}{% endif %}" readonly>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Agente de Venta</label>
+                {{ form.agente }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Solicitud</label>
+                {{ form.solicitud }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Status</label>
+                {{ form.status }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Conceptos -->
+    <div class="card shadow-sm p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0">Conceptos</h5>
+            <button type="button" class="btn btn-primary btn-sm" onclick="agregarLinea()">
+                <i class="bi bi-plus me-1"></i>Agregar
+            </button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover" id="tabla-conceptos">
+                <thead class="table-light">
+                    <tr>
+                        <th>SKU</th>
+                        <th>Clave SAT</th>
+                        <th>Unidad SAT</th>
+                        <th>Descripción</th>
+                        <th>Cantidad</th>
+                        <th>Precio Unit.</th>
+                        <th>Subtotal</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpo-conceptos">
+                    {% for detalle in detalles %}
+                    <tr>
+                        <td>
+                            <select class="form-select form-select-sm sku-select" name="sku[]" style="min-width:120px;">
+                                <option value="">Seleccionar...</option>
+                                {% for producto in productos %}
+                                <option value="{{ producto.sku }}"
+                                    {% if producto.sku == detalle.sku %}selected{% endif %}>
+                                    {{ producto.sku }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td><input type="text" class="form-control form-control-sm" name="clave_sat[]" value="{{ detalle.clave_sat }}" readonly style="min-width:100px;"></td>
+                        <td><input type="text" class="form-control form-control-sm" name="unidad_sat[]" value="{{ detalle.unidad_sat }}" readonly style="min-width:100px;"></td>
+                        <td><input type="text" class="form-control form-control-sm" name="descripcion[]" value="{{ detalle.descripcion }}" style="min-width:200px;"></td>
+                        <td><input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="{{ detalle.cantidad }}" min="1" style="min-width:80px;"></td>
+                        <td><input type="number" class="form-control form-control-sm precio" name="precio_unitario[]" value="{{ detalle.precio_unitario }}" step="0.01" style="min-width:100px;"></td>
+                        <td><input type="number" class="form-control form-control-sm subtotal" name="subtotal[]" value="{{ detalle.subtotal }}" readonly style="min-width:100px;"></td>
+                        <td><button type="button" class="btn btn-danger btn-sm" onclick="eliminarLinea(this)"><i class="bi bi-trash"></i></button></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Totales -->
+        <div class="row justify-content-end mt-3">
+            <div class="col-md-4">
+                <table class="table table-sm">
+                    <tr>
+                        <td class="text-muted">Base:</td>
+                        <td class="text-end fw-bold" id="display-base">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">IVA:</td>
+                        <td class="text-end fw-bold" id="display-iva">$0.00</td>
+                    </tr>
+                    <tr class="table-dark">
+                        <td class="fw-bold">Total:</td>
+                        <td class="text-end fw-bold" id="display-total">$0.00</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Condiciones Comerciales -->
+    <div class="card shadow-sm p-4 mb-4">
+        <h5 class="fw-bold mb-3">Condiciones Comerciales</h5>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Moneda</label>
+                {{ form.moneda }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">IVA</label>
+                {{ form.iva }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Forma de Pago</label>
+                {{ form.forma_pago }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Vigencia</label>
+                {{ form.vigencia }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Tiempo de Entrega</label>
+                {{ form.tiempo_entrega }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Lugar de Entrega</label>
+                {{ form.lugar_entrega }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Cuenta Bancaria</label>
+                {{ form.cuenta }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Notas -->
+    <div class="card shadow-sm p-4 mb-4">
+        <h5 class="fw-bold mb-3">Notas</h5>
+        {{ form.notas }}
+    </div>
+
+    <div class="d-flex gap-2 justify-content-end mb-5">
+        <a href="{% url 'lista_cotizaciones' %}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-warning">Guardar Cambios</button>
+    </div>
+</form>
+
+<!-- Template para línea de concepto -->
+<template id="template-linea">
+    <tr>
+        <td>
+            <select class="form-select form-select-sm sku-select" name="sku[]" style="min-width:120px;">
+                <option value="">Seleccionar...</option>
+                {% for producto in productos %}
+                <option value="{{ producto.sku }}"
+                    data-clave="{{ producto.clave_sat }}"
+                    data-unidad="{{ producto.unidad_sat }}"
+                    data-descripcion="{{ producto.descripcion }}"
+                    data-precio="{{ producto.precio_unitario }}">
+                    {{ producto.sku }}
+                </option>
+                {% endfor %}
+            </select>
+        </td>
+        <td><input type="text" class="form-control form-control-sm" name="clave_sat[]" readonly style="min-width:100px;"></td>
+        <td><input type="text" class="form-control form-control-sm" name="unidad_sat[]" readonly style="min-width:100px;"></td>
+        <td><input type="text" class="form-control form-control-sm" name="descripcion[]" style="min-width:200px;"></td>
+        <td><input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" style="min-width:80px;"></td>
+        <td><input type="number" class="form-control form-control-sm precio" name="precio_unitario[]" value="0" step="0.01" style="min-width:100px;"></td>
+        <td><input type="number" class="form-control form-control-sm subtotal" name="subtotal[]" value="0" readonly style="min-width:100px;"></td>
+        <td><button type="button" class="btn btn-danger btn-sm" onclick="eliminarLinea(this)"><i class="bi bi-trash"></i></button></td>
+    </tr>
+</template>
+
+<script>
+    const productos = {
+        {% for producto in productos %}
+        "{{ producto.sku }}": {
+            clave_sat: "{{ producto.clave_sat }}",
+            unidad_sat: "{{ producto.unidad_sat }}",
+            descripcion: "{{ producto.descripcion }}",
+            precio_unitario: {{ producto.precio_unitario }}
+        },
+        {% endfor %}
+    };
+
+    function agregarLinea() {
+        const template = document.getElementById('template-linea');
+        const clon = template.content.cloneNode(true);
+        const tbody = document.getElementById('cuerpo-conceptos');
+        tbody.appendChild(clon);
+        const nuevaFila = tbody.lastElementChild;
+        nuevaFila.querySelector('.sku-select').addEventListener('change', function() {
+            autocompletarProducto(this);
+        });
+        nuevaFila.querySelector('.cantidad').addEventListener('input', calcularTotales);
+        nuevaFila.querySelector('.precio').addEventListener('input', calcularTotales);
+    }
+
+    function autocompletarProducto(select) {
+        const sku = select.value;
+        const fila = select.closest('tr');
+        if (sku && productos[sku]) {
+            const p = productos[sku];
+            fila.querySelector('[name="clave_sat[]"]').value = p.clave_sat;
+            fila.querySelector('[name="unidad_sat[]"]').value = p.unidad_sat;
+            fila.querySelector('[name="descripcion[]"]').value = p.descripcion;
+            fila.querySelector('[name="precio_unitario[]"]').value = p.precio_unitario;
+            calcularTotales();
+        }
+    }
+
+    function eliminarLinea(btn) {
+        btn.closest('tr').remove();
+        calcularTotales();
+    }
+
+    function calcularTotales() {
+        let base = 0;
+        document.querySelectorAll('#cuerpo-conceptos tr').forEach(fila => {
+            const cantidad = parseFloat(fila.querySelector('.cantidad').value) || 0;
+            const precio = parseFloat(fila.querySelector('.precio').value) || 0;
+            const subtotal = cantidad * precio;
+            fila.querySelector('.subtotal').value = subtotal.toFixed(2);
+            base += subtotal;
+        });
+
+        const ivaPct = parseFloat(document.getElementById('id_iva').value) || 0;
+        const iva = base * (ivaPct / 100);
+        const total = base + iva;
+
+        document.getElementById('display-base').textContent = '$' + base.toFixed(2);
+        document.getElementById('display-iva').textContent = '$' + iva.toFixed(2);
+        document.getElementById('display-total').textContent = '$' + total.toFixed(2);
+        document.getElementById('total_calculado').value = total.toFixed(2);
+    }
+
+    document.getElementById('id_iva').addEventListener('change', calcularTotales);
+
+    document.getElementById('id_rfc').addEventListener('change', function() {
+        const rfc = this.value;
+        if (rfc) {
+            fetch(`/cotizaciones/api/cliente/${rfc}/`)
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('razon_social').value = data.razon_social;
+                    document.getElementById('codigo_postal').value = data.codigo_postal;
+                });
+        }
+    });
+
+    document.getElementById('id_contacto').addEventListener('change', function() {
+        const pk = this.value;
+        if (pk) {
+            fetch(`/cotizaciones/api/contacto/${pk}/`)
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('nombre_contacto').value = data.nombre;
+                    document.getElementById('puesto_contacto').value = data.puesto;
+                });
+        }
+    });
+
+    calcularTotales();
+
+    document.querySelectorAll('#cuerpo-conceptos tr').forEach(fila => {
+        fila.querySelector('.cantidad').addEventListener('input', calcularTotales);
+        fila.querySelector('.precio').addEventListener('input', calcularTotales);
+    });
+</script>
+{% endblock %}

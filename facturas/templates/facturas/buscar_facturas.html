@@ -1,0 +1,66 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Buscar Facturas{% endblock %}
+
+{% block content %}
+    <div class="card shadow p-4">
+        <h2 class="mb-4">Buscar Facturas por RFC</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="input-group mb-4">
+                <input type="text" name="rfc" class="form-control" placeholder="Ingresa el RFC..." value="{{ rfc }}">
+                <button type="submit" class="btn btn-primary">Buscar</button>
+            </div>
+        </form>
+
+        {% if rfc %}
+            {% if facturas %}
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Folio</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Abono</th>
+                            <th>Saldo Pendiente</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for factura in facturas %}
+                        <tr>
+                            <td>{{ factura.folio }}</td>
+                            <td>${{ factura.total }}</td>
+                            <td>{{ factura.get_status_display }}</td>
+                            <td>
+                                {% if factura.monto_abono %}
+                                    ${{ factura.monto_abono }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if factura.status == 'PAGADO' %}
+                                    <span class="text-success fw-bold">$0.00</span>
+                                {% elif factura.status == 'ABONO' and factura.monto_abono %}
+                                    <span class="text-warning fw-bold">${{ factura.saldo_pendiente }}</span>
+                                {% else %}
+                                    <span class="text-danger fw-bold">${{ factura.total }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="card mt-3 p-3 text-end">
+                    <h5>Saldo Pendiente Total: 
+                        <span class="text-danger fw-bold">${{ saldo_total }}</span>
+                    </h5>
+                </div>
+
+            {% else %}
+                <div class="alert alert-warning">No se encontraron facturas para el RFC <strong>{{ rfc }}</strong>.</div>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endblock %}

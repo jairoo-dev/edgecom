@@ -1,0 +1,36 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Editar Cuenta Bancaria{% endblock %}
+
+{% block content %}
+    <div class="card shadow p-4" style="max-width: 600px; margin: auto;">
+        <h2 class="mb-4">Editar Cuenta Bancaria</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Banco</label>
+                    {{ form.banco }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Número de Cuenta</label>
+                    {{ form.numero_cuenta }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">CLABE</label>
+                    {{ form.clabe }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Moneda</label>
+                    {{ form.moneda }}
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">Beneficiario</label>
+                    {{ form.beneficiario }}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-warning w-100 mt-4">Guardar Cambios</button>
+        </form>
+        <a href="{% url 'lista_cuentas' %}" class="btn btn-secondary w-100 mt-2">Cancelar</a>
+    </div>
+{% endblock %}

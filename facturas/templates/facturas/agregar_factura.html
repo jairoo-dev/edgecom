@@ -1,0 +1,56 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Agregar Factura{% endblock %}
+
+{% block content %}
+    <div class="card shadow p-4" style="max-width: 600px; margin: auto;">
+        <h2 class="mb-4">Agregar Factura</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Folio</label>
+                {{ form.folio }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">RFC</label>
+                {{ form.rfc }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Total</label>
+                {{ form.total }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Status</label>
+                {{ form.status }}
+            </div>
+
+            <div class="mb-3" id="campo_abono" style="display:none;">
+                <label class="form-label">Monto Abonado</label>
+                {{ form.monto_abono }}
+            </div>
+
+            <div class="mb-3" id="campo_vencimiento" style="display:none;">
+                <label class="form-label">Fecha de Vencimiento</label>
+                {{ form.fecha_vencimiento }}
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 mt-3">Guardar</button>
+        </form>
+        <a href="{% url 'lista_facturas' %}" class="btn btn-secondary w-100 mt-2">Cancelar</a>
+    </div>
+
+    <script>
+        const status = document.getElementById('id_status');
+        const campoAbono = document.getElementById('campo_abono');
+        const campoVencimiento = document.getElementById('campo_vencimiento');
+
+        function actualizarCampos() {
+            const valor = status.value;
+            campoAbono.style.display = valor === 'ABONO' ? 'block' : 'none';
+            campoVencimiento.style.display = valor === 'CREDITO' ? 'block' : 'none';
+        }
+
+        status.addEventListener('change', actualizarCampos);
+        actualizarCampos();
+    </script>
+{% endblock %}

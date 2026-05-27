@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Eliminar Cotización{% endblock %}
+
+{% block content %}
+    <div class="card shadow p-4 text-center" style="max-width: 500px; margin: auto;">
+        <h2 class="mb-3">¿Eliminar cotización?</h2>
+        <p class="mb-4">¿Estás seguro que deseas eliminar el folio <strong>{{ cotizacion.folio }}</strong>?</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger w-100">Sí, eliminar</button>
+        </form>
+        <a href="{% url 'lista_cotizaciones' %}" class="btn btn-secondary w-100 mt-2">Cancelar</a>
+    </div>
+{% endblock %}

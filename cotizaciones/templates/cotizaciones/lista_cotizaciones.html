@@ -1,0 +1,75 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Cotizaciones{% endblock %}
+
+{% block content %}
+    <div class="card shadow p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Cotizaciones</h2>
+            <a href="{% url 'agregar_cotizacion' %}" class="btn btn-primary">
+                <i class="bi bi-plus me-1"></i>Nueva Cotización
+            </a>
+        </div>
+
+        <!-- Filtro por agente (solo visible para admin) -->
+        {% if request.user.is_superuser or request.user.is_staff %}
+        <div class="mb-3 d-flex align-items-center gap-2">
+            <label class="form-label mb-0 fw-bold">Filtrar por agente:</label>
+            <div class="dropdown">
+                <button class="btn btn-outline-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    {% if agente_filtro %}
+                        {% for agente in agentes %}
+                            {% if agente.id|stringformat:"s" == agente_filtro %}{{ agente.nombre }}{% endif %}
+                        {% endfor %}
+                    {% else %}
+                        Todos los agentes
+                    {% endif %}
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item {% if not agente_filtro %}active{% endif %}" href="{% url 'lista_cotizaciones' %}">Todos los agentes</a></li>
+                    {% for agente in agentes %}
+                    <li>
+                        <a class="dropdown-item {% if agente.id|stringformat:'s' == agente_filtro %}active{% endif %}"
+                           href="{% url 'lista_cotizaciones' %}?agente={{ agente.id }}">
+                            {{ agente.nombre }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Folio</th>
+                    <th>RFC</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cotizacion in cotizaciones %}
+                <tr>
+                    <td>
+                        <a href="{% url 'detalle_cotizacion' cotizacion.folio %}" class="fw-bold text-decoration-none">
+                            {{ cotizacion.folio }}
+                        </a>
+                    </td>
+                    <td>{{ cotizacion.rfc_id|default:"—" }}</td>
+                    <td>${{ cotizacion.total }}</td>
+                    <td>{{ cotizacion.get_status_display|default:"—" }}</td>
+                    <td>{{ cotizacion.fecha }}</td>
+                    <td>
+                        <a href="{% url 'editar_cotizacion' cotizacion.folio %}" class="btn btn-warning btn-sm">Editar</a>
+                        <a href="{% url 'eliminar_cotizacion' cotizacion.folio %}" class="btn btn-danger btn-sm">Eliminar</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

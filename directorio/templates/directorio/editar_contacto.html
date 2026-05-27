@@ -1,0 +1,36 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Editar Contacto{% endblock %}
+
+{% block content %}
+    <div class="card shadow p-4" style="max-width: 600px; margin: auto;">
+        <h2 class="mb-4">Editar Contacto</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Nombre</label>
+                    {{ form.nombre }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Puesto</label>
+                    {{ form.puesto }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Teléfono</label>
+                    {{ form.telefono }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    {{ form.email }}
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">Notas</label>
+                    {{ form.notas }}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-warning w-100 mt-4">Guardar Cambios</button>
+        </form>
+        <a href="{% url 'lista_contactos' %}" class="btn btn-secondary w-100 mt-2">Cancelar</a>
+    </div>
+{% endblock %}

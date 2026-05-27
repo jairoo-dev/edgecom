@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: letter;
+            margin: 1.5cm;
+        }
+        * {
+            font-family: Arial, sans-serif;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            color: #222;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            margin-left: -0.3cm;
+        }
+        .logo img {
+            height: 60px;
+        }
+        .empresa-info {
+            text-align: left;
+            font-size: 9px;
+            color: #444;
+        }
+        .contacto-info {
+            text-align: left;
+            font-size: 9px;
+            color: #444;
+        }
+        .titulo {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            margin: 15px 0;
+            padding: 8px 0;
+            color: #1a5276;
+        }
+        .seccion-folio-cliente {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .folio-fecha {
+            font-size: 10px;
+            color: #222;
+        }
+        .folio-fecha .label-primary {
+            color: #1a5276;
+            font-weight: bold;
+        }
+        .folio-fecha span {
+            color: #222;
+            font-weight: bold;
+        }
+        .cliente-info {
+            text-align: left;
+            font-size: 10px;
+        }
+        .cliente-info .label {
+            color: #1a5276;
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .cliente-info .valor {
+            color: #222;
+        }
+        table.conceptos {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        table.conceptos thead tr {
+            background-color: #1a5276;
+            color: white;
+        }
+        table.conceptos thead th {
+            padding: 6px 8px;
+            text-align: left;
+            font-size: 9px;
+            text-transform: uppercase;
+        }
+        table.conceptos tbody tr {
+            border-bottom: 1px solid #eee;
+        }
+        table.conceptos tbody td {
+            padding: 6px 8px;
+            font-size: 9px;
+            vertical-align: top;
+            color: #222;
+        }
+        table.conceptos tbody tr:nth-child(even) {
+            background-color: #f5f8fa;
+        }
+        .campo-fila {
+            margin-top: 2px;
+        }
+        .campo-label {
+            color: #1a5276;
+            font-weight: bold;
+            font-size: 9px;
+            display: inline-block;
+            width: 70px;
+        }
+        .campo-valor {
+            color: #444;
+            font-size: 9px;
+        }
+        .totales-condiciones {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .condiciones {
+            font-size: 9px;
+            width: 55%;
+            color: #222;
+        }
+        .condiciones h4 {
+            font-size: 10px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            color: #1a5276;
+        }
+        .condiciones p {
+            margin: 2px 0;
+        }
+        .condiciones .label {
+            font-weight: bold;
+            color: #1a5276;
+        }
+        .totales {
+            width: 40%;
+            font-size: 10px;
+        }
+        table.totales-tabla {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table.totales-tabla td {
+            padding: 5px 8px;
+            border-bottom: 1px solid #eee;
+            color: #222;
+        }
+        table.totales-tabla .label-total {
+            color: #1a5276;
+            font-weight: bold;
+        }
+        table.totales-tabla .total-final {
+            background-color: #1a5276;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .agente-firma {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+        .agente-info {
+            font-size: 9px;
+            width: 45%;
+            color: #222;
+        }
+        .agente-info h4 {
+            font-size: 10px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            color: #1a5276;
+        }
+        .firma-box {
+            width: 45%;
+            text-align: center;
+        }
+        .firma-box img {
+            max-height: 70px;
+            max-width: 200px;
+        }
+        .firma-linea {
+            border-top: 1px solid #333;
+            margin-top: 5px;
+            padding-top: 3px;
+            font-size: 9px;
+            color: #222;
+        }
+        .pie-pagina {
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 8px;
+            font-size: 8px;
+            color: #666;
+            text-align: left;
+        }
+        .datos-bancarios {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 8px;
+            color: #444;
+            text-align: left;
+        }
+        .datos-bancarios div {
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ENCABEZADO -->
+    <div class="header">
+        <div class="logo">
+            <img src="{{ logo_path }}" alt="EDGECOM">
+        </div>
+        <div class="empresa-info">
+            <strong>EDGECOM</strong><br>
+            Alvaro Artiñano, Edificio B, Planta Baja Local 2<br>
+            24158, Residencial del Lago, Ciudad del Carmen, Campeche, México<br>
+            EDG1602101K9<br>
+            Régimen General de Ley de Personas Morales
+        </div>
+        <div class="contacto-info">
+            Whatsapp Business 938 385 1511<br>
+            www.edgecom.mx<br>
+            Teléfono +52 938 384 1304
+        </div>
+    </div>
+
+    <!-- TÍTULO -->
+    <div class="titulo">COTIZACION</div>
+
+    <!-- FOLIO, FECHA Y CLIENTE -->
+    <div class="seccion-folio-cliente">
+        <div class="folio-fecha">
+            <span class="label-primary">Folio</span> <span>{{ cotizacion.folio }}</span><br>
+            <span class="label-primary">Fecha</span> <span>{{ cotizacion.fecha }}</span><br>
+            {% if cotizacion.solicitud %}
+            <span class="label-primary">Solicitud</span> <span>{{ cotizacion.solicitud }}</span>
+            {% endif %}
+        </div>
+        <div class="cliente-info">
+            <div class="label">Cliente</div>
+            <strong class="valor">{{ cotizacion.rfc.razon_social }}</strong><br>
+            <span class="valor">{{ cotizacion.rfc_id }}</span><br>
+            <span class="valor">{{ cotizacion.rfc.codigo_postal }}</span><br>
+            {% if cotizacion.contacto %}
+            <br>
+            <div class="label">Contacto</div>
+            <span class="valor">{{ cotizacion.contacto.nombre }}</span><br>
+            <span class="valor">{{ cotizacion.contacto.puesto }}</span><br>
+            <span class="valor">{{ cotizacion.contacto.telefono }}</span><br>
+            <span class="valor">{{ cotizacion.contacto.email }}</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- CONCEPTOS -->
+    <table class="conceptos">
+        <thead>
+            <tr>
+                <th>Identificación</th>
+                <th>Descripción</th>
+                <th>Cantidad</th>
+                <th>$ Unitario</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detalle in detalles %}
+            <tr>
+                <td>
+                    <div class="campo-fila">
+                        <span class="campo-label">SKU</span>
+                        <span class="campo-valor">{{ detalle.sku }}</span>
+                    </div>
+                    <div class="campo-fila">
+                        <span class="campo-label">Clave SAT</span>
+                        <span class="campo-valor">{{ detalle.clave_sat }}</span>
+                    </div>
+                    <div class="campo-fila">
+                        <span class="campo-label">Unidad SAT</span>
+                        <span class="campo-valor">{{ detalle.unidad_sat }}</span>
+                    </div>
+                </td>
+                <td>{{ detalle.descripcion }}</td>
+                <td>{{ detalle.cantidad|floatformat:2 }}</td>
+                <td>${{ detalle.precio_unitario|floatformat:2 }}</td>
+                <td>${{ detalle.subtotal|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- TOTALES Y CONDICIONES -->
+    <div class="totales-condiciones">
+        <div class="condiciones">
+            <h4>Condiciones Comerciales</h4>
+            {% if cotizacion.moneda %}
+            <p><span class="label">Moneda:</span> {{ cotizacion.moneda }}</p>
+            {% endif %}
+            {% if cotizacion.forma_pago %}
+            <p><span class="label">Forma de Pago:</span> {{ cotizacion.get_forma_pago_display }}</p>
+            {% endif %}
+            {% if cotizacion.vigencia %}
+            <p><span class="label">Vigencia:</span> {{ cotizacion.get_vigencia_display }}</p>
+            {% endif %}
+            {% if cotizacion.tiempo_entrega %}
+            <p><span class="label">Tiempo de Entrega:</span> {{ cotizacion.get_tiempo_entrega_display }}</p>
+            {% endif %}
+            {% if cotizacion.lugar_entrega %}
+            <p><span class="label">Lugar de Entrega:</span> {{ cotizacion.lugar_entrega }}</p>
+            {% endif %}
+            {% if cotizacion.notas %}
+            <p><span class="label">Notas:</span> {{ cotizacion.notas }}</p>
+            {% endif %}
+        </div>
+        <div class="totales">
+            <table class="totales-tabla">
+                <tr>
+                    <td class="label-total">BASE</td>
+                    <td style="text-align:right;">${{ base|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <td class="label-total">IVA {{ cotizacion.iva }}%</td>
+                    <td style="text-align:right;">${{ monto_iva|floatformat:2 }}</td>
+                </tr>
+                <tr class="total-final">
+                    <td>TOTAL</td>
+                    <td style="text-align:right;">${{ cotizacion.total|floatformat:2 }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- AGENTE Y FIRMA -->
+    {% if cotizacion.agente %}
+    <div class="agente-firma">
+        <div class="agente-info">
+            <h4>Agente de Ventas</h4>
+            <p>{{ cotizacion.agente.nombre }}</p>
+            <p>{{ cotizacion.agente.telefono }}</p>
+            <p>{{ cotizacion.agente.email }}</p>
+        </div>
+        <div class="firma-box">
+            {% if cotizacion.agente.firma %}
+            <img src="{{ firma_path }}">
+            {% endif %}
+            <div class="firma-linea">
+                Nombre: {{ cotizacion.agente.nombre }}<br>
+                RFC: EDG1602101K9
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- PIE DE PÁGINA -->
+    <div class="pie-pagina">
+        En caso de aprobación, emitir Orden de compra a nombre de EDGECOM S de RL de CV. La información contenida en este documento es confidencial; EDGECOM no comparte datos de sus clientes y solicita de manera expresa que sus datos no sean compartidos. El Pago se deberá realizar en Moneda Nacional a nombre de EDGECOM a la cuenta descrita en este formato. Cualquier comentario o anomalía en el proceso de cotización favor de reportarlo de manera anónima a la cuenta de correo electrónico delavega@edgecom.mx.
+        <div class="datos-bancarios">
+            <div>
+                <strong>CUENTA BANCARIA</strong><br>
+                {% if cotizacion.cuenta %}
+                {{ cotizacion.cuenta.banco }}<br>
+                Cuenta: {{ cotizacion.cuenta.numero_cuenta }}<br>
+                CLABE: {{ cotizacion.cuenta.clabe }}<br>
+                Beneficiario: {{ cotizacion.cuenta.beneficiario }}<br>
+                Moneda: {{ cotizacion.cuenta.moneda }}
+                {% else %}
+                No se especificó cuenta bancaria
+                {% endif %}
+                <br><strong>WWW.EDGECOM.MX</strong>
+            </div>
+            <div>
+                <strong>EDGECOM</strong><br>
+                EDG1602101K9<br>
+                Régimen General de Ley de Personas Morales<br>
+                Alvaro Artiñano Aguilar, Edificio B, Planta Baja, Local 2<br>
+                Residencial del Lago, Ciudad del Carmen, Campeche<br>
+                Código Postal 24158
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

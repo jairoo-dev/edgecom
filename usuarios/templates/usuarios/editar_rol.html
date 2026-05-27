@@ -1,0 +1,99 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Editar Rol{% endblock %}
+
+{% block content %}
+    <div class="card shadow p-4" style="max-width: 600px; margin: auto;">
+        <h2 class="mb-4">Editar Rol — {{ rol.nombre }}</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Nombre del Rol</label>
+                    {{ form.nombre }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Descripción</label>
+                    {{ form.descripcion }}
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label fw-bold">Módulos principales</label>
+                    <div class="row g-2 mt-1">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.puede_ver_facturas }}
+                                <label class="form-check-label">Ver Facturas</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.puede_ver_cotizaciones }}
+                                <label class="form-check-label">Ver Cotizaciones</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label fw-bold">Catálogo</label>
+                    <div class="row g-2 mt-1">
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                {{ form.puede_ver_clientes }}
+                                <label class="form-check-label">Clientes</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                {{ form.puede_ver_productos }}
+                                <label class="form-check-label">Productos</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                {{ form.puede_ver_servicios }}
+                                <label class="form-check-label">Servicios</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                {{ form.puede_ver_directorio }}
+                                <label class="form-check-label">Directorio</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                {{ form.puede_ver_agentes }}
+                                <label class="form-check-label">Agentes de Venta</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                {{ form.puede_ver_cuentas }}
+                                <label class="form-check-label">Cuentas Bancarias</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label fw-bold">Acciones</label>
+                    <div class="row g-2 mt-1">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.puede_editar }}
+                                <label class="form-check-label">Puede Editar</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.puede_eliminar }}
+                                <label class="form-check-label">Puede Eliminar</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-warning w-100 mt-4">Guardar Cambios</button>
+        </form>
+        <a href="{% url 'lista_roles' %}" class="btn btn-secondary w-100 mt-2">Cancelar</a>
+    </div>
+{% endblock %}
