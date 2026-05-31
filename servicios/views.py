@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from usuarios.decoradores import permiso_requerido
 from .forms import ServicioForm
 from .models import Servicio
@@ -42,3 +43,20 @@ def eliminar_servicio(request, sku):
         servicio.delete()
         return redirect('lista_servicios')
     return render(request, 'servicios/eliminar_servicio.html', {'servicio': servicio})
+
+@login_required(login_url='login')
+def crear_rapido(request):
+    if request.method == 'POST':
+        form = ServicioForm(request.POST)
+        if form.is_valid():
+            servicio = form.save()
+            return JsonResponse({
+                'success': True,
+                'sku': servicio.sku,
+                'clave_sat': servicio.clave_sat,
+                'unidad_sat': servicio.unidad_sat,
+                'descripcion': servicio.descripcion,
+                'precio_unitario': str(servicio.precio_unitario),
+            })
+        return JsonResponse({'success': False, 'errors': form.errors})
+    return JsonResponse({'success': False})

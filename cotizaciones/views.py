@@ -13,18 +13,24 @@ from clientes.models import Cliente
 from directorio.models import Contacto
 from agentes.models import Agente
 from productos.models import Producto
+from servicios.models import Servicio
 from usuarios.decoradores import permiso_requerido
 
 @login_required(login_url='login')
 @permiso_requerido('puede_ver_cotizaciones')
 def lista_cotizaciones(request):
     agente_filtro = request.GET.get('agente', '')
+    status_filtro = request.GET.get('status', '')
+
     if request.user.is_superuser or request.user.is_staff:
         cotizaciones = Cotizacion.objects.all()
         if agente_filtro:
             cotizaciones = cotizaciones.filter(agente__id=agente_filtro)
     else:
         cotizaciones = Cotizacion.objects.filter(creado_por=request.user)
+
+    if status_filtro:
+        cotizaciones = cotizaciones.filter(status=status_filtro)
 
     agentes = Agente.objects.all()
     form = CotizacionForm()
@@ -33,6 +39,7 @@ def lista_cotizaciones(request):
         'form': form,
         'agentes': agentes,
         'agente_filtro': agente_filtro,
+        'status_filtro': status_filtro,
     })
 
 @login_required(login_url='login')
@@ -78,9 +85,11 @@ def agregar_cotizacion(request):
         if agente_usuario:
             form.fields['agente'].widget.attrs['disabled'] = True
     productos = Producto.objects.all()
+    servicios = Servicio.objects.all()
     return render(request, 'cotizaciones/agregar_cotizacion.html', {
         'form': form,
         'productos': productos,
+        'servicios': servicios,
         'agente_usuario': agente_usuario,
     })
 
@@ -121,8 +130,15 @@ def editar_cotizacion(request, folio):
     else:
         form = CotizacionForm(instance=cotizacion)
     productos = Producto.objects.all()
+    servicios = Servicio.objects.all()
     detalles = cotizacion.detalles.all()
-    return render(request, 'cotizaciones/editar_cotizacion.html', {'form': form, 'cotizacion': cotizacion, 'detalles': detalles, 'productos': productos})
+    return render(request, 'cotizaciones/editar_cotizacion.html', {
+        'form': form,
+        'cotizacion': cotizacion,
+        'detalles': detalles,
+        'productos': productos,
+        'servicios': servicios,
+    })
 
 @login_required(login_url='login')
 @permiso_requerido('puede_eliminar')

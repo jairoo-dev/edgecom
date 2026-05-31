@@ -11,34 +11,60 @@
             </a>
         </div>
 
-        <!-- Filtro por agente (solo visible para admin) -->
-        {% if request.user.is_superuser or request.user.is_staff %}
-        <div class="mb-3 d-flex align-items-center gap-2">
-            <label class="form-label mb-0 fw-bold">Filtrar por agente:</label>
-            <div class="dropdown">
-                <button class="btn btn-outline-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    {% if agente_filtro %}
-                        {% for agente in agentes %}
-                            {% if agente.id|stringformat:"s" == agente_filtro %}{{ agente.nombre }}{% endif %}
-                        {% endfor %}
-                    {% else %}
-                        Todos los agentes
-                    {% endif %}
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item {% if not agente_filtro %}active{% endif %}" href="{% url 'lista_cotizaciones' %}">Todos los agentes</a></li>
-                    {% for agente in agentes %}
-                    <li>
-                        <a class="dropdown-item {% if agente.id|stringformat:'s' == agente_filtro %}active{% endif %}"
-                           href="{% url 'lista_cotizaciones' %}?agente={{ agente.id }}">
-                            {{ agente.nombre }}
-                        </a>
-                    </li>
-                    {% endfor %}
-                </ul>
+        <!-- Filtros -->
+        <div class="mb-3 d-flex align-items-center gap-3 flex-wrap">
+
+            <!-- Filtro por status -->
+            <div class="d-flex align-items-center gap-2">
+                <label class="form-label mb-0 fw-bold">Status:</label>
+                <div class="dropdown">
+                    <button class="btn btn-outline-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        {% if status_filtro %}
+                            {{ status_filtro|capfirst }}
+                        {% else %}
+                            Todos
+                        {% endif %}
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item {% if not status_filtro %}active{% endif %}" href="{% url 'lista_cotizaciones' %}{% if agente_filtro %}?agente={{ agente_filtro }}{% endif %}">Todos</a></li>
+                        <li><a class="dropdown-item {% if status_filtro == 'ENVIADO' %}active{% endif %}" href="{% url 'lista_cotizaciones' %}?status=ENVIADO{% if agente_filtro %}&agente={{ agente_filtro }}{% endif %}">Enviado</a></li>
+                        <li><a class="dropdown-item {% if status_filtro == 'NEGOCIACION' %}active{% endif %}" href="{% url 'lista_cotizaciones' %}?status=NEGOCIACION{% if agente_filtro %}&agente={{ agente_filtro }}{% endif %}">Negociación</a></li>
+                        <li><a class="dropdown-item {% if status_filtro == 'PERDIDO' %}active{% endif %}" href="{% url 'lista_cotizaciones' %}?status=PERDIDO{% if agente_filtro %}&agente={{ agente_filtro }}{% endif %}">Perdido</a></li>
+                        <li><a class="dropdown-item {% if status_filtro == 'FACTURADO' %}active{% endif %}" href="{% url 'lista_cotizaciones' %}?status=FACTURADO{% if agente_filtro %}&agente={{ agente_filtro }}{% endif %}">Facturado</a></li>
+                    </ul>
+                </div>
             </div>
+
+            <!-- Filtro por agente (solo admin) -->
+            {% if request.user.is_superuser or request.user.is_staff %}
+            <div class="d-flex align-items-center gap-2">
+                <label class="form-label mb-0 fw-bold">Agente:</label>
+                <div class="dropdown">
+                    <button class="btn btn-outline-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        {% if agente_filtro %}
+                            {% for agente in agentes %}
+                                {% if agente.id|stringformat:"s" == agente_filtro %}{{ agente.nombre }}{% endif %}
+                            {% endfor %}
+                        {% else %}
+                            Todos los agentes
+                        {% endif %}
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item {% if not agente_filtro %}active{% endif %}" href="{% url 'lista_cotizaciones' %}{% if status_filtro %}?status={{ status_filtro }}{% endif %}">Todos los agentes</a></li>
+                        {% for agente in agentes %}
+                        <li>
+                            <a class="dropdown-item {% if agente.id|stringformat:'s' == agente_filtro %}active{% endif %}"
+                               href="{% url 'lista_cotizaciones' %}?agente={{ agente.id }}{% if status_filtro %}&status={{ status_filtro }}{% endif %}">
+                                {{ agente.nombre }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
         </div>
-        {% endif %}
 
         <table class="table table-striped table-hover">
             <thead class="table-dark">
