@@ -5,7 +5,21 @@
     <style>
         @page {
             size: letter;
-            margin: 1.5cm;
+            margin-top: 4.5cm;
+            margin-bottom: 4cm;
+            margin-left: 1.5cm;
+            margin-right: 1.5cm;
+
+            @top-center {
+                content: element(header);
+                width: 100%;
+            }
+            @bottom-center {
+                content: element(footer);
+                width: 100%;
+                vertical-align: top;
+                padding-top: 0.5cm;
+            }
         }
         * {
             font-family: Arial, sans-serif;
@@ -17,11 +31,15 @@
             margin: 0;
             padding: 0;
         }
+
+        /* ENCABEZADO FIJO */
         .header {
+            position: running(header);
+            width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 20px;
+            padding-bottom: 20px;
             margin-left: -0.3cm;
         }
         .logo img {
@@ -30,33 +48,61 @@
         .empresa-info {
             text-align: left;
             font-size: 9px;
+            line-height: 1.6;
             color: #444;
         }
         .contacto-info {
             text-align: left;
             font-size: 9px;
+            line-height: 1.6;
             color: #444;
         }
+
+        /* PIE DE PÁGINA FIJO */
+        .pie-pagina {
+            position: running(footer);
+            width: 100%;
+            border-top: 1px solid #ccc;
+            padding-top: 15px;
+            font-size: 8px;
+            line-height: 1.6;
+            color: #666;
+            text-align: left;
+        }
+        .datos-bancarios {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 8px;
+            line-height: 1.6;
+            color: #444;
+            text-align: left;
+        }
+        .datos-bancarios div {
+            text-align: left;
+        }
+
+        /* CONTENIDO */
         .titulo {
             text-align: center;
             font-size: 16px;
             font-weight: bold;
             letter-spacing: 3px;
-            margin: 15px 0;
+            margin: 25px 0;
             padding: 8px 0;
-            color: #1a5276;
+            color: {{ empresa.color_primario|default:"#1a5276" }};
         }
         .seccion-folio-cliente {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 15px;
+            margin-bottom: 25px;
         }
         .folio-fecha {
             font-size: 10px;
             color: #222;
         }
         .folio-fecha .label-primary {
-            color: #1a5276;
+            color: {{ empresa.color_primario|default:"#1a5276" }};
             font-weight: bold;
         }
         .folio-fecha span {
@@ -68,7 +114,7 @@
             font-size: 10px;
         }
         .cliente-info .label {
-            color: #1a5276;
+            color: {{ empresa.color_primario|default:"#1a5276" }};
             font-size: 9px;
             font-weight: bold;
             text-transform: uppercase;
@@ -79,10 +125,13 @@
         table.conceptos {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        table.conceptos thead {
+            display: table-header-group;
         }
         table.conceptos thead tr {
-            background-color: #1a5276;
+            background-color: {{ empresa.color_primario|default:"#1a5276" }};
             color: white;
         }
         table.conceptos thead th {
@@ -93,9 +142,11 @@
         }
         table.conceptos tbody tr {
             border-bottom: 1px solid #eee;
+            break-inside: avoid;
+            page-break-inside: avoid;
         }
         table.conceptos tbody td {
-            padding: 6px 8px;
+            padding: 10px 8px;
             font-size: 9px;
             vertical-align: top;
             color: #222;
@@ -107,7 +158,7 @@
             margin-top: 2px;
         }
         .campo-label {
-            color: #1a5276;
+            color: {{ empresa.color_primario|default:"#1a5276" }};
             font-weight: bold;
             font-size: 9px;
             display: inline-block;
@@ -120,7 +171,9 @@
         .totales-condiciones {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 15px;
+            margin-bottom: 25px;
+            break-inside: avoid;
+            page-break-inside: avoid;
         }
         .condiciones {
             font-size: 9px;
@@ -132,14 +185,14 @@
             font-weight: bold;
             margin-bottom: 5px;
             text-transform: uppercase;
-            color: #1a5276;
+            color: {{ empresa.color_primario|default:"#1a5276" }};
         }
         .condiciones p {
             margin: 2px 0;
         }
         .condiciones .label {
             font-weight: bold;
-            color: #1a5276;
+            color: {{ empresa.color_primario|default:"#1a5276" }};
         }
         .totales {
             width: 40%;
@@ -155,21 +208,23 @@
             color: #222;
         }
         table.totales-tabla .label-total {
-            color: #1a5276;
+            color: {{ empresa.color_primario|default:"#1a5276" }};
             font-weight: bold;
         }
-        table.totales-tabla .total-final {
-            background-color: #1a5276;
-            color: white;
+        table.totales-tabla .total-final td {
+            background-color: {{ empresa.color_primario|default:"#1a5276" }};
+            color: white !important;
             font-weight: bold;
             font-size: 12px;
         }
         .agente-firma {
             display: flex;
             justify-content: space-between;
-            margin-top: 20px;
+            margin-top: 30px;
             border-top: 1px solid #ccc;
-            padding-top: 10px;
+            padding-top: 15px;
+            break-inside: avoid;
+            page-break-inside: avoid;
         }
         .agente-info {
             font-size: 9px;
@@ -181,7 +236,7 @@
             font-weight: bold;
             margin-bottom: 5px;
             text-transform: uppercase;
-            color: #1a5276;
+            color: {{ empresa.color_primario|default:"#1a5276" }};
         }
         .firma-box {
             width: 45%;
@@ -198,45 +253,53 @@
             font-size: 9px;
             color: #222;
         }
-        .pie-pagina {
-            margin-top: 20px;
-            border-top: 1px solid #ccc;
-            padding-top: 8px;
-            font-size: 8px;
-            color: #666;
-            text-align: left;
-        }
-        .datos-bancarios {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 8px;
-            font-size: 8px;
-            color: #444;
-            text-align: left;
-        }
-        .datos-bancarios div {
-            text-align: left;
-        }
     </style>
 </head>
 <body>
 
-    <!-- ENCABEZADO -->
+    <!-- ENCABEZADO FIJO -->
     <div class="header">
         <div class="logo">
-            <img src="{{ logo_path }}" alt="EDGECOM">
+            <img src="{{ logo_path }}" alt="{{ empresa.nombre|default:'EDGECOM' }}">
         </div>
         <div class="empresa-info">
-            <strong>EDGECOM</strong><br>
-            Alvaro Artiñano, Edificio B, Planta Baja Local 2<br>
-            24158, Residencial del Lago, Ciudad del Carmen, Campeche, México<br>
-            EDG1602101K9<br>
-            Régimen General de Ley de Personas Morales
+            <strong>{{ empresa.nombre|default:"EDGECOM" }}</strong><br>
+            {{ empresa.direccion|default:"Alvaro Artiñano, Edificio B, Planta Baja Local 2" }}<br>
+            {{ empresa.codigo_postal|default:"24158" }}<br>
+            {{ empresa.rfc|default:"EDG1602101K9" }}<br>
+            {{ empresa.regimen_fiscal|default:"Régimen General de Ley de Personas Morales" }}
         </div>
         <div class="contacto-info">
-            Whatsapp Business 938 385 1511<br>
-            www.edgecom.mx<br>
-            Teléfono +52 938 384 1304
+            Whatsapp Business {{ empresa.whatsapp|default:"938 385 1511" }}<br>
+            {{ empresa.sitio_web|default:"www.edgecom.mx" }}<br>
+            Teléfono +52 {{ empresa.telefono|default:"938 384 1304" }}
+        </div>
+    </div>
+
+    <!-- PIE DE PÁGINA FIJO -->
+    <div class="pie-pagina">
+        {{ empresa.pie_pagina|default:"En caso de aprobación, emitir Orden de compra a nombre de EDGECOM S de RL de CV. La información contenida en este documento es confidencial." }}
+        <div class="datos-bancarios">
+            <div>
+                <strong>CUENTA BANCARIA</strong><br>
+                {% if cotizacion.cuenta %}
+                {{ cotizacion.cuenta.banco }}<br>
+                Cuenta: {{ cotizacion.cuenta.numero_cuenta }}<br>
+                CLABE: {{ cotizacion.cuenta.clabe }}<br>
+                Beneficiario: {{ cotizacion.cuenta.beneficiario }}<br>
+                Moneda: {{ cotizacion.cuenta.moneda }}
+                {% else %}
+                No se especificó cuenta bancaria
+                {% endif %}
+                <br><strong>{{ empresa.sitio_web|default:"WWW.EDGECOM.MX"|upper }}</strong>
+            </div>
+            <div>
+                <strong>{{ empresa.nombre|default:"EDGECOM" }}</strong><br>
+                {{ empresa.rfc|default:"EDG1602101K9" }}<br>
+                {{ empresa.regimen_fiscal|default:"Régimen General de Ley de Personas Morales" }}<br>
+                {{ empresa.direccion|default:"Alvaro Artiñano Aguilar, Edificio B, Planta Baja, Local 2" }}<br>
+                Código Postal {{ empresa.codigo_postal|default:"24158" }}
+            </div>
         </div>
     </div>
 
@@ -361,39 +424,11 @@
             {% endif %}
             <div class="firma-linea">
                 Nombre: {{ cotizacion.agente.nombre }}<br>
-                RFC: EDG1602101K9
+                RFC: {{ empresa.rfc|default:"EDG1602101K9" }}
             </div>
         </div>
     </div>
     {% endif %}
-
-    <!-- PIE DE PÁGINA -->
-    <div class="pie-pagina">
-        En caso de aprobación, emitir Orden de compra a nombre de EDGECOM S de RL de CV. La información contenida en este documento es confidencial; EDGECOM no comparte datos de sus clientes y solicita de manera expresa que sus datos no sean compartidos. El Pago se deberá realizar en Moneda Nacional a nombre de EDGECOM a la cuenta descrita en este formato. Cualquier comentario o anomalía en el proceso de cotización favor de reportarlo de manera anónima a la cuenta de correo electrónico delavega@edgecom.mx.
-        <div class="datos-bancarios">
-            <div>
-                <strong>CUENTA BANCARIA</strong><br>
-                {% if cotizacion.cuenta %}
-                {{ cotizacion.cuenta.banco }}<br>
-                Cuenta: {{ cotizacion.cuenta.numero_cuenta }}<br>
-                CLABE: {{ cotizacion.cuenta.clabe }}<br>
-                Beneficiario: {{ cotizacion.cuenta.beneficiario }}<br>
-                Moneda: {{ cotizacion.cuenta.moneda }}
-                {% else %}
-                No se especificó cuenta bancaria
-                {% endif %}
-                <br><strong>WWW.EDGECOM.MX</strong>
-            </div>
-            <div>
-                <strong>EDGECOM</strong><br>
-                EDG1602101K9<br>
-                Régimen General de Ley de Personas Morales<br>
-                Alvaro Artiñano Aguilar, Edificio B, Planta Baja, Local 2<br>
-                Residencial del Lago, Ciudad del Carmen, Campeche<br>
-                Código Postal 24158
-            </div>
-        </div>
-    </div>
 
 </body>
 </html>

@@ -19,6 +19,13 @@ def agregar_agente(request):
         if form.is_valid():
             form.save()
             return redirect('lista_agentes')
+        else:
+            agentes = Agente.objects.all()
+            return render(request, 'agentes/lista_agentes.html', {
+                'agentes': agentes,
+                'form': form,
+                'abrir_modal': True,
+            })
     return redirect('lista_agentes')
 
 @login_required(login_url='login')

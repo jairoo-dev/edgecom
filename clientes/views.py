@@ -2,24 +2,28 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from usuarios.decoradores import permiso_requerido
 from .forms import ClienteForm
-from .models import Cliente
 from .models import Cliente, DocumentoCliente
 
 @login_required(login_url='login')
-@permiso_requerido('puede_ver_clientes')
 def lista_clientes(request):
     clientes = Cliente.objects.all()
     form = ClienteForm()
     return render(request, 'clientes/lista_clientes.html', {'clientes': clientes, 'form': form})
 
 @login_required(login_url='login')
-@permiso_requerido('puede_ver_clientes')
 def agregar_cliente(request):
     if request.method == 'POST':
         form = ClienteForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('lista_clientes')
+        else:
+            clientes = Cliente.objects.all()
+            return render(request, 'clientes/lista_clientes.html', {
+                'clientes': clientes,
+                'form': form,
+                'abrir_modal': True,
+            })
     return redirect('lista_clientes')
 
 @login_required(login_url='login')
@@ -57,7 +61,6 @@ def subir_documento(request, rfc):
 @login_required(login_url='login')
 def eliminar_documento(request, pk):
     documento = get_object_or_404(DocumentoCliente, pk=pk)
-    rfc = documento.cliente.rfc
     if request.method == 'POST':
         documento.archivo.delete()
         documento.delete()

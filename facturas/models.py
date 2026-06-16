@@ -17,6 +17,7 @@ class Factura(models.Model):
     total = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     monto_abono = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    fecha_pago = models.DateField(null=True, blank=True, verbose_name='Fecha de Pago / Abono')
     fecha_vencimiento = models.DateField(null=True, blank=True)
     notas = models.TextField(blank=True, null=True)
     agente = models.ForeignKey(Agente, on_delete=models.SET_NULL, null=True, blank=True, related_name='facturas')

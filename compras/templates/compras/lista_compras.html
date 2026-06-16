@@ -1,0 +1,225 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Compras{% endblock %}
+
+{% block content %}
+<div class="card shadow p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2><i class="bi bi-cart me-2"></i>Compras</h2>
+        <div class="d-flex gap-2">
+            <a href="{% url 'buscar_compras' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-search me-1"></i>Buscar por Proveedor
+            </a>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarCompra">
+                + Nueva Compra
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtros por status -->
+    <div class="mb-3 d-flex gap-2 flex-wrap">
+        <a href="{% url 'lista_compras' %}"
+           class="btn btn-sm {% if not status_filtro %}btn-dark{% else %}btn-outline-dark{% endif %}">
+            Todas
+        </a>
+        <a href="?status=RECIBIDA"
+           class="btn btn-sm {% if status_filtro == 'RECIBIDA' %}btn-info{% else %}btn-outline-dark{% endif %}">
+            Recibidas
+        </a>
+        <a href="?status=CREDITO"
+           class="btn btn-sm {% if status_filtro == 'CREDITO' %}btn-warning{% else %}btn-outline-dark{% endif %}">
+            Crédito
+        </a>
+        <a href="?status=ADEUDO"
+           class="btn btn-sm {% if status_filtro == 'ADEUDO' %}btn-danger{% else %}btn-outline-dark{% endif %}">
+            Adeudo
+        </a>
+        <a href="?status=ABONO"
+           class="btn btn-sm {% if status_filtro == 'ABONO' %}btn-secondary{% else %}btn-outline-dark{% endif %}">
+            Abono
+        </a>
+        <a href="?status=PAGADA"
+           class="btn btn-sm {% if status_filtro == 'PAGADA' %}btn-success{% else %}btn-outline-dark{% endif %}">
+            Pagadas
+        </a>
+    </div>
+
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Folio</th>
+                <th>Proveedor</th>
+                <th>Fecha</th>
+                <th>Vencimiento</th>
+                <th>Total</th>
+                <th>Abono</th>
+                <th>Saldo Pendiente</th>
+                <th>Status</th>
+                <th>Forma de Pago</th>
+                <th>Fecha Pago</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for compra in compras %}
+            <tr>
+                <td>{{ compra.folio }}</td>
+                <td>{{ compra.proveedor.nombre }}</td>
+                <td>{{ compra.fecha|default:"—" }}</td>
+                <td>{{ compra.fecha_vencimiento|default:"—" }}</td>
+                <td>${{ compra.total }}</td>
+                <td>
+                    {% if compra.monto_abono %}
+                        ${{ compra.monto_abono }}
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if compra.saldo_pendiente == 0 %}
+                        <span class="text-success fw-bold">$0.00</span>
+                    {% else %}
+                        <span class="text-danger fw-bold">${{ compra.saldo_pendiente }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if compra.status == 'PAGADA' %}
+                        <span class="badge bg-success">Pagada</span>
+                    {% elif compra.status == 'RECIBIDA' %}
+                        <span class="badge bg-info text-dark">Recibida</span>
+                    {% elif compra.status == 'CREDITO' %}
+                        <span class="badge bg-warning text-dark">Crédito</span>
+                    {% elif compra.status == 'ADEUDO' %}
+                        <span class="badge bg-danger">Adeudo</span>
+                    {% elif compra.status == 'ABONO' %}
+                        <span class="badge bg-secondary">Abono</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if compra.forma_pago %}
+                        {{ compra.get_forma_pago_display }}
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if compra.fecha_pago %}
+                        <span class="text-success">{{ compra.fecha_pago }}</span>
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'editar_compra' compra.folio %}" class="btn btn-warning btn-sm">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <a href="{% url 'eliminar_compra' compra.folio %}" class="btn btn-danger btn-sm">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="11" class="text-center text-muted py-4">No hay compras registradas.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        {% if compras %}
+        <tfoot class="table-light">
+            <tr>
+                <td colspan="6" class="text-end fw-bold">Saldo total pendiente:</td>
+                <td class="fw-bold text-danger">${{ saldo_total }}</td>
+                <td colspan="4"></td>
+            </tr>
+        </tfoot>
+        {% endif %}
+    </table>
+</div>
+
+<!-- Modal Nueva Compra -->
+<div class="modal fade" id="modalAgregarCompra" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="bi bi-cart me-1"></i>Nueva Compra</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'agregar_compra' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Folio de Factura *</label>
+                            {{ form.folio }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Proveedor *</label>
+                            {{ form.proveedor }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Total *</label>
+                            {{ form.total }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Fecha Factura</label>
+                            {{ form.fecha }}
+                        </div>
+                        <div class="col-md-4" id="m_campo_vencimiento">
+                            <label class="form-label">Fecha Vencimiento</label>
+                            {{ form.fecha_vencimiento }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Status</label>
+                            {{ form.status }}
+                        </div>
+                        <div class="col-md-6" id="m_campo_abono" style="display:none;">
+                            <label class="form-label">Monto Abono</label>
+                            {{ form.monto_abono }}
+                        </div>
+                        <div class="col-md-6" id="m_campo_fecha_pago" style="display:none;">
+                            <label class="form-label">Fecha de Pago / Abono</label>
+                            {{ form.fecha_pago }}
+                        </div>
+                        <div class="col-md-6" id="m_campo_forma_pago" style="display:none;">
+                            <label class="form-label">Forma de Pago</label>
+                            {{ form.forma_pago }}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Notas</label>
+                            {{ form.notas }}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function () {
+    // Destruir Select2 en el select de status del modal para usar change nativo
+    $('#id_status').select2('destroy');
+    $('#id_status').addClass('form-select');
+
+    function actualizarCamposModal() {
+        var valor = $('#id_status').val();
+        $('#m_campo_abono').toggle(valor === 'ABONO');
+        $('#m_campo_fecha_pago').toggle(valor === 'PAGADA' || valor === 'ABONO');
+        $('#m_campo_forma_pago').toggle(valor === 'PAGADA' || valor === 'ABONO');
+        $('#m_campo_vencimiento').toggle(valor === 'CREDITO' || valor === 'ADEUDO' || valor === 'RECIBIDA');
+    }
+
+    $('#id_status').on('change', actualizarCamposModal);
+
+    $('#modalAgregarCompra').on('shown.bs.modal', function () {
+        actualizarCamposModal();
+    });
+});
+</script>
+{% endblock %}

@@ -1,14 +1,20 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from weasyprint import HTML
+import os
+from django.conf import settings
 from .forms import FacturaForm
 from .models import Factura
+from clientes.models import Cliente
+from configuracion.models import ConfiguracionEmpresa
 from usuarios.decoradores import permiso_requerido
 
 @login_required(login_url='login')
 @permiso_requerido('puede_ver_facturas')
 def lista_facturas(request):
     status_filtro = request.GET.get('status', '')
-    # Administradores y staff ven todas; los demás solo las suyas
     if request.user.is_superuser or request.user.is_staff:
         facturas = Factura.objects.all()
     else:
@@ -27,7 +33,7 @@ def agregar_factura(request):
         form = FacturaForm(request.POST)
         if form.is_valid():
             factura = form.save(commit=False)
-            factura.creado_por = request.user  # asignamos el usuario automáticamente
+            factura.creado_por = request.user
             factura.save()
             return redirect('lista_facturas')
     return redirect('lista_facturas')
@@ -36,7 +42,6 @@ def agregar_factura(request):
 @permiso_requerido('puede_editar')
 def editar_factura(request, folio):
     factura = get_object_or_404(Factura, folio=folio)
-    # Solo el creador o admin puede editar
     if not request.user.is_superuser and not request.user.is_staff:
         if factura.creado_por != request.user:
             return redirect('sin_acceso')
@@ -53,7 +58,6 @@ def editar_factura(request, folio):
 @permiso_requerido('puede_eliminar')
 def eliminar_factura(request, folio):
     factura = get_object_or_404(Factura, folio=folio)
-    # Solo el creador o admin puede eliminar
     if not request.user.is_superuser and not request.user.is_staff:
         if factura.creado_por != request.user:
             return redirect('sin_acceso')
@@ -68,6 +72,7 @@ def buscar_facturas(request):
     facturas = []
     rfc = ''
     saldo_total = 0
+    cliente = None
     if request.method == 'POST':
         rfc = request.POST.get('rfc', '')
         if rfc:
@@ -76,4 +81,43 @@ def buscar_facturas(request):
             else:
                 facturas = Factura.objects.filter(rfc=rfc, creado_por=request.user)
             saldo_total = sum(f.saldo_pendiente() for f in facturas)
-    return render(request, 'facturas/buscar_facturas.html', {'facturas': facturas, 'rfc': rfc, 'saldo_total': saldo_total})
+            try:
+                cliente = Cliente.objects.get(rfc=rfc)
+            except Cliente.DoesNotExist:
+                cliente = None
+    return render(request, 'facturas/buscar_facturas.html', {
+        'facturas': facturas,
+        'rfc': rfc,
+        'saldo_total': saldo_total,
+        'cliente': cliente,
+    })
+
+@login_required(login_url='login')
+@permiso_requerido('puede_ver_facturas')
+def estado_cuenta_pdf(request, rfc):
+    cliente = get_object_or_404(Cliente, rfc=rfc)
+    if request.user.is_superuser or request.user.is_staff:
+        facturas = Factura.objects.filter(rfc=rfc)
+    else:
+        facturas = Factura.objects.filter(rfc=rfc, creado_por=request.user)
+
+    saldo_total = sum(f.saldo_pendiente() for f in facturas)
+    empresa = ConfiguracionEmpresa.objects.first()
+
+    if empresa and empresa.logo:
+        logo_path = os.path.join(settings.MEDIA_ROOT, str(empresa.logo))
+    else:
+        logo_path = os.path.join(settings.BASE_DIR, 'core', 'static', 'core', 'logo.png')
+
+    html_string = render_to_string('facturas/estado_cuenta_pdf.html', {
+        'cliente': cliente,
+        'facturas': facturas,
+        'saldo_total': saldo_total,
+        'empresa': empresa,
+        'logo_path': f'file:///{logo_path}'.replace('\\', '/'),
+    })
+
+    pdf = HTML(string=html_string).write_pdf()
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="estado_cuenta_{rfc}.pdf"'
+    return response

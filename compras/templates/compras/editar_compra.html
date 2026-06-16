@@ -1,0 +1,84 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Editar Compra{% endblock %}
+
+{% block content %}
+<div class="card shadow p-4" style="max-width: 700px; margin: auto;">
+    <h4 class="mb-4"><i class="bi bi-pencil me-2"></i>Editar Compra — {{ compra.folio }}</h4>
+    <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Folio</label>
+                {{ form.folio }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Proveedor</label>
+                {{ form.proveedor }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Total</label>
+                {{ form.total }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Fecha Factura</label>
+                {{ form.fecha }}
+            </div>
+            <div class="col-md-4" id="campo_vencimiento">
+                <label class="form-label">Fecha Vencimiento</label>
+                {{ form.fecha_vencimiento }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Status</label>
+                {{ form.status }}
+            </div>
+            <div class="col-md-6" id="campo_abono" style="display:none;">
+                <label class="form-label">Monto Abono</label>
+                {{ form.monto_abono }}
+            </div>
+            <div class="col-md-6" id="campo_fecha_pago" style="display:none;">
+                <label class="form-label">Fecha de Pago / Abono</label>
+                {{ form.fecha_pago }}
+            </div>
+            <div class="col-md-6" id="campo_forma_pago" style="display:none;">
+                <label class="form-label">Forma de Pago</label>
+                {{ form.forma_pago }}
+            </div>
+            <div class="col-12">
+                <label class="form-label">Notas</label>
+                {{ form.notas }}
+            </div>
+        </div>
+        <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            <a href="{% url 'lista_compras' %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function () {
+    $('#id_status').select2('destroy');
+    $('#id_status').addClass('form-select');
+
+    // También destruir Select2 en forma_pago para que no interfiera
+    $('#id_forma_pago').select2('destroy');
+    $('#id_forma_pago').addClass('form-select');
+
+    function actualizarCampos() {
+        var valor = $('#id_status').val();
+        $('#campo_abono').toggle(valor === 'ABONO');
+        $('#campo_fecha_pago').toggle(valor === 'PAGADA' || valor === 'ABONO');
+        $('#campo_forma_pago').toggle(valor === 'PAGADA' || valor === 'ABONO');
+        $('#campo_vencimiento').toggle(valor === 'CREDITO' || valor === 'ADEUDO' || valor === 'RECIBIDA');
+    }
+
+    $('#id_status').on('change', actualizarCampos);
+
+    // Al cargar la página, reflejar el status actual guardado
+    actualizarCampos();
+});
+</script>
+{% endblock %}

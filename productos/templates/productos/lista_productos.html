@@ -50,6 +50,16 @@
                 <form method="post" action="{% url 'agregar_producto' %}">
                     {% csrf_token %}
                     <div class="modal-body">
+                        {% if abrir_modal and form.errors %}
+                        <div class="alert alert-danger fw-bold">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            {% if form.sku.errors %}
+                                    El SKU <strong>{{ form.sku.value }}</strong> ya existe en el catálogo.
+                            {% else %}
+                                Por favor corrige los errores antes de guardar.
+                            {% endif %}
+                        </div>
+                        {% endif %}
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">SKU</label>
@@ -81,4 +91,14 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block scripts %}
+{% if abrir_modal %}
+<script>
+    $(document).ready(function () {
+        new bootstrap.Modal(document.getElementById('modalAgregarProducto')).show();
+    });
+</script>
+{% endif %}
 {% endblock %}

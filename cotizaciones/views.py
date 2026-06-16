@@ -14,6 +14,7 @@ from directorio.models import Contacto
 from agentes.models import Agente
 from productos.models import Producto
 from servicios.models import Servicio
+from configuracion.models import ConfiguracionEmpresa
 from usuarios.decoradores import permiso_requerido
 
 @login_required(login_url='login')
@@ -214,12 +215,21 @@ def generar_pdf(request, folio):
     if not request.user.is_superuser and not request.user.is_staff:
         if cotizacion.creado_por != request.user:
             return redirect('sin_acceso')
+
     detalles = cotizacion.detalles.all()
     iva_pct = Decimal(cotizacion.iva) / 100 if cotizacion.iva else Decimal('0')
     base = sum(d.subtotal for d in detalles)
     monto_iva = base * iva_pct
 
-    logo_path = os.path.join(settings.BASE_DIR, 'core', 'static', 'core', 'logo.png')
+    empresa = ConfiguracionEmpresa.objects.first()
+
+    # Logo
+    if empresa and empresa.logo:
+        logo_path = os.path.join(settings.MEDIA_ROOT, str(empresa.logo))
+    else:
+        logo_path = os.path.join(settings.BASE_DIR, 'core', 'static', 'core', 'logo.png')
+
+    # Firma
     firma_path = ''
     if cotizacion.agente and cotizacion.agente.firma:
         firma_path = os.path.join(settings.MEDIA_ROOT, str(cotizacion.agente.firma))
@@ -229,6 +239,7 @@ def generar_pdf(request, folio):
         'detalles': detalles,
         'base': base,
         'monto_iva': monto_iva,
+        'empresa': empresa,
         'logo_path': f'file:///{logo_path}'.replace('\\', '/'),
         'firma_path': f'file:///{firma_path}'.replace('\\', '/'),
     })

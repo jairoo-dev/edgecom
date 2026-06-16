@@ -30,8 +30,8 @@
                     <td>
                         <a href="{% url 'editar_cliente' cliente.rfc %}" class="btn btn-warning btn-sm">Editar</a>
                         <a href="{% url 'eliminar_cliente' cliente.rfc %}" class="btn btn-danger btn-sm">Eliminar</a>
-                        <button type="button" class="btn btn-info btn-sm" 
-                            data-bs-toggle="modal" 
+                        <button type="button" class="btn btn-info btn-sm"
+                            data-bs-toggle="modal"
                             data-bs-target="#modalDocumentos{{ forloop.counter }}">
                             <i class="bi bi-file-earmark-pdf me-1"></i>Docs ({{ cliente.documentos.count }})
                         </button>
@@ -53,6 +53,16 @@
                 <form method="post" action="{% url 'agregar_cliente' %}">
                     {% csrf_token %}
                     <div class="modal-body">
+                        {% if abrir_modal and form.errors %}
+                        <div class="alert alert-danger fw-bold">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            {% if form.rfc.errors %}
+                                ⚠ El RFC <strong>{{ form.rfc.value }}</strong> ya existe en el catálogo.
+                            {% else %}
+                                Por favor corrige los errores antes de guardar.
+                            {% endif %}
+                        </div>
+                        {% endif %}
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">RFC</label>
@@ -87,11 +97,12 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-file-earmark-pdf me-1"></i>Documentos — {{ cliente.razon_social }}</h5>
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-file-earmark-pdf me-1"></i>Documentos — {{ cliente.razon_social }}
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- Subir nuevo documento -->
                     <form method="post" action="{% url 'subir_documento' cliente.rfc %}" enctype="multipart/form-data" class="mb-4">
                         {% csrf_token %}
                         <div class="input-group">
@@ -101,8 +112,6 @@
                             </button>
                         </div>
                     </form>
-
-                    <!-- Lista de documentos -->
                     {% if cliente.documentos.all %}
                     <table class="table table-sm table-hover">
                         <thead class="table-light">
@@ -145,4 +154,14 @@
         </div>
     </div>
     {% endfor %}
+{% endblock %}
+
+{% block scripts %}
+{% if abrir_modal %}
+<script>
+    $(document).ready(function () {
+        new bootstrap.Modal(document.getElementById('modalAgregarCliente')).show();
+    });
+</script>
+{% endif %}
 {% endblock %}

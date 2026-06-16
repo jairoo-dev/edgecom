@@ -1,0 +1,229 @@
+{% extends 'core/base.html' %}
+{% block title %}Editar Orden {{ orden.folio_orden }}{% endblock %}
+
+{% block content %}
+<div class="card shadow p-4">
+    <h4 class="mb-4"><i class="bi bi-pencil me-2"></i>Editar Orden — {{ orden.folio_orden }}</h4>
+    <form method="post">
+        {% csrf_token %}
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="form-label mb-0">Proveedor *</label>
+                    <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalNuevoProveedorEditar">
+                        <i class="bi bi-plus-circle me-1"></i>Nuevo Proveedor
+                    </button>
+                </div>
+                {{ form.proveedor }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Folio Cotización Proveedor</label>
+                {{ form.folio_cotizacion }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Cotización Interna</label>
+                {{ form.cotizacion_interna }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Número de Pedido Cliente</label>
+                {{ form.numero_pedido_cliente }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Forma de Pago</label>
+                {{ form.forma_pago }}
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Moneda</label>
+                {{ form.moneda }}
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Autorizado por</label>
+                {{ form.autorizado_por }}
+            </div>
+            <div class="col-12">
+                <label class="form-label">Notas</label>
+                {{ form.notas }}
+            </div>
+        </div>
+
+        <h6 class="fw-bold mb-2">Conceptos</h6>
+        <table class="table table-bordered table-sm">
+            <thead class="table-secondary">
+                <tr>
+                    <th>SKU</th>
+                    <th>Descripción</th>
+                    <th>Cantidad</th>
+                    <th>Costo Unitario</th>
+                    <th>Subtotal</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="conceptosBody">
+                {% for d in detalles %}
+                <tr class="fila-concepto">
+                    <td>
+                        <select name="sku[]" class="form-select form-select-sm sku-select">
+                            <option value="{{ d.sku }}">{{ d.sku }}</option>
+                            {% for p in productos %}
+                            <option value="{{ p.sku }}" data-desc="{{ p.descripcion }}" data-precio="{{ p.precio_unitario }}"
+                                {% if p.sku == d.sku %}selected{% endif %}>{{ p.sku }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td><input type="text" name="descripcion[]" class="form-control form-control-sm campo-desc" value="{{ d.descripcion }}"></td>
+                    <td><input type="number" name="cantidad[]" class="form-control form-control-sm campo-cant" value="{{ d.cantidad }}" step="0.01"></td>
+                    <td><input type="number" name="costo_unitario[]" class="form-control form-control-sm campo-precio" value="{{ d.costo_unitario }}" step="0.01"></td>
+                    <td><input type="number" name="subtotal[]" class="form-control form-control-sm campo-subtotal" value="{{ d.subtotal }}" step="0.01" readonly></td>
+                    <td><button type="button" class="btn btn-danger btn-sm btn-eliminar-fila"><i class="bi bi-trash"></i></button></td>
+                </tr>
+                {% empty %}
+                <tr class="fila-concepto">
+                    <td>
+                        <select name="sku[]" class="form-select form-select-sm sku-select">
+                            <option value="">— SKU —</option>
+                            {% for p in productos %}<option value="{{ p.sku }}" data-desc="{{ p.descripcion }}" data-precio="{{ p.precio_unitario }}">{{ p.sku }}</option>{% endfor %}
+                        </select>
+                    </td>
+                    <td><input type="text" name="descripcion[]" class="form-control form-control-sm campo-desc"></td>
+                    <td><input type="number" name="cantidad[]" class="form-control form-control-sm campo-cant" value="1" step="0.01"></td>
+                    <td><input type="number" name="costo_unitario[]" class="form-control form-control-sm campo-precio" value="0" step="0.01"></td>
+                    <td><input type="number" name="subtotal[]" class="form-control form-control-sm campo-subtotal" value="0" step="0.01" readonly></td>
+                    <td><button type="button" class="btn btn-danger btn-sm btn-eliminar-fila"><i class="bi bi-trash"></i></button></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" class="text-end fw-bold">TOTAL</td>
+                    <td><input type="number" id="totalCalculado" name="total_calculado" class="form-control form-control-sm" value="{{ orden.total }}" readonly></td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+        <button type="button" class="btn btn-outline-primary btn-sm mt-1 mb-3" id="btnAgregarFila">
+            <i class="bi bi-plus"></i> Agregar línea
+        </button>
+
+        <div class="d-flex gap-2 mt-2">
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            <a href="{% url 'lista_ordenes' %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<script>
+function calcularSubtotal(fila) {
+    const cant  = parseFloat(fila.querySelector('.campo-cant').value) || 0;
+    const precio= parseFloat(fila.querySelector('.campo-precio').value) || 0;
+    fila.querySelector('.campo-subtotal').value = (cant * precio).toFixed(2);
+    calcularTotal();
+}
+function calcularTotal() {
+    let total = 0;
+    document.querySelectorAll('.campo-subtotal').forEach(e => total += parseFloat(e.value) || 0);
+    document.getElementById('totalCalculado').value = total.toFixed(2);
+}
+function agregarEventosFila(fila) {
+    fila.querySelector('.sku-select').addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        fila.querySelector('.campo-desc').value   = opt.dataset.desc   || '';
+        fila.querySelector('.campo-precio').value = opt.dataset.precio || 0;
+        calcularSubtotal(fila);
+    });
+    fila.querySelector('.campo-cant').addEventListener('input',   () => calcularSubtotal(fila));
+    fila.querySelector('.campo-precio').addEventListener('input', () => calcularSubtotal(fila));
+    fila.querySelector('.btn-eliminar-fila').addEventListener('click', function() {
+        if (document.querySelectorAll('.fila-concepto').length > 1) { fila.remove(); calcularTotal(); }
+    });
+}
+document.querySelectorAll('.fila-concepto').forEach(agregarEventosFila);
+document.getElementById('btnAgregarFila').addEventListener('click', function() {
+    const primera = document.querySelector('.fila-concepto');
+    const nueva   = primera.cloneNode(true);
+    nueva.querySelectorAll('input').forEach(i => i.value = i.type === 'number' ? '0' : '');
+    nueva.querySelector('.sku-select').selectedIndex = 0;
+    nueva.querySelector('.campo-cant').value = 1;
+    document.getElementById('conceptosBody').appendChild(nueva);
+    agregarEventosFila(nueva);
+});
+document.getElementById('btnGuardarProveedorEditar').addEventListener('click', function() {
+    const nombre   = document.getElementById('eprov_nombre').value.trim();
+    const rfc      = document.getElementById('eprov_rfc').value.trim();
+    const contacto = document.getElementById('eprov_contacto').value.trim();
+    const telefono = document.getElementById('eprov_telefono').value.trim();
+    const email    = document.getElementById('eprov_email').value.trim();
+    const mensaje  = document.getElementById('emsg_proveedor');
+
+    if (!nombre) {
+        mensaje.innerHTML = '<div class="alert alert-danger py-1">El nombre es obligatorio.</div>';
+        return;
+    }
+
+    fetch('/proveedores/crear-rapido/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: `nombre=${encodeURIComponent(nombre)}&rfc=${encodeURIComponent(rfc)}&contacto=${encodeURIComponent(contacto)}&telefono=${encodeURIComponent(telefono)}&email=${encodeURIComponent(email)}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const select = document.getElementById('id_proveedor');
+            const option = new Option(data.nombre, data.id, true, true);
+            select.add(option);
+            bootstrap.Modal.getInstance(document.getElementById('modalNuevoProveedorEditar')).hide();
+            ['eprov_nombre','eprov_rfc','eprov_contacto','eprov_telefono','eprov_email'].forEach(id => document.getElementById(id).value = '');
+            mensaje.innerHTML = '';
+        } else {
+            mensaje.innerHTML = `<div class="alert alert-danger py-1">${data.error}</div>`;
+        }
+    });
+});
+</script>
+
+<!-- Modal Nuevo Proveedor Rápido (editar) -->
+<div class="modal fade" id="modalNuevoProveedorEditar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="bi bi-truck me-1"></i>Nuevo Proveedor</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="emsg_proveedor"></div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Nombre / Razón Social *</label>
+                        <input type="text" id="eprov_nombre" class="form-control" placeholder="Nombre del proveedor">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">RFC</label>
+                        <input type="text" id="eprov_rfc" class="form-control" placeholder="RFC">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Contacto</label>
+                        <input type="text" id="eprov_contacto" class="form-control" placeholder="Nombre del contacto">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Teléfono</label>
+                        <input type="text" id="eprov_telefono" class="form-control" placeholder="Teléfono">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="eprov_email" class="form-control" placeholder="correo@ejemplo.com">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btnGuardarProveedorEditar">
+                    <i class="bi bi-save me-1"></i>Guardar y Seleccionar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

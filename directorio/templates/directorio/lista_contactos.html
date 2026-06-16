@@ -4,17 +4,36 @@
 
 {% block content %}
     <div class="card shadow p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
             <h2>Directorio</h2>
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarContacto">
                 + Nuevo Contacto
             </button>
         </div>
+
+        <!-- Filtros -->
+        <div class="mb-3 d-flex gap-2">
+            <a href="{% url 'lista_contactos' %}"
+               class="btn btn-sm {% if not tipo_filtro %}btn-dark{% else %}btn-outline-dark{% endif %}">
+                Todos
+            </a>
+            <a href="?tipo=CLIENTE"
+               class="btn btn-sm {% if tipo_filtro == 'CLIENTE' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                Clientes
+            </a>
+            <a href="?tipo=PROVEEDOR"
+               class="btn btn-sm {% if tipo_filtro == 'PROVEEDOR' %}btn-success{% else %}btn-outline-success{% endif %}">
+                Proveedores
+            </a>
+        </div>
+
         <table class="table table-striped table-hover">
             <thead class="table-dark">
                 <tr>
+                    <th>Tipo</th>
                     <th>Nombre</th>
                     <th>Puesto</th>
+                    <th>RFC</th>
                     <th>Teléfono</th>
                     <th>Email</th>
                     <th>Acciones</th>
@@ -23,14 +42,26 @@
             <tbody>
                 {% for contacto in contactos %}
                 <tr>
+                    <td>
+                        {% if contacto.tipo == 'CLIENTE' %}
+                            <span class="badge bg-primary">Cliente</span>
+                        {% else %}
+                            <span class="badge bg-success">Proveedor</span>
+                        {% endif %}
+                    </td>
                     <td>{{ contacto.nombre }}</td>
                     <td>{{ contacto.puesto }}</td>
+                    <td>{{ contacto.rfc|default:"—" }}</td>
                     <td>{{ contacto.telefono }}</td>
                     <td>{{ contacto.email }}</td>
                     <td>
                         <a href="{% url 'editar_contacto' contacto.pk %}" class="btn btn-warning btn-sm">Editar</a>
                         <a href="{% url 'eliminar_contacto' contacto.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
                     </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">No hay contactos registrados.</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -48,7 +79,21 @@
                 <form method="post" action="{% url 'agregar_contacto' %}">
                     {% csrf_token %}
                     <div class="modal-body">
+                        {% if abrir_modal and form.errors %}
+                        <div class="alert alert-danger fw-bold">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            ⚠ Por favor corrige los errores antes de guardar.
+                        </div>
+                        {% endif %}
                         <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Tipo</label>
+                                {{ form.tipo }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">RFC</label>
+                                {{ form.rfc }}
+                            </div>
                             <div class="col-md-6">
                                 <label class="form-label">Nombre</label>
                                 {{ form.nombre }}
@@ -79,4 +124,14 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block scripts %}
+{% if abrir_modal %}
+<script>
+    $(document).ready(function () {
+        new bootstrap.Modal(document.getElementById('modalAgregarContacto')).show();
+    });
+</script>
+{% endif %}
 {% endblock %}

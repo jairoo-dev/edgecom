@@ -1,0 +1,16 @@
+{% extends 'core/base.html' %}
+{% block title %}Eliminar Orden{% endblock %}
+{% block content %}
+<div class="card shadow p-4" style="max-width: 500px; margin: auto;">
+    <h4 class="mb-3 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Eliminar Orden de Compra</h4>
+    <p>¿Estás seguro de que deseas eliminar la orden <strong>{{ orden.folio_orden }}</strong> del proveedor <strong>{{ orden.proveedor.nombre }}</strong>?</p>
+    <p class="text-muted small">Esta acción eliminará también todos los conceptos de la orden y no se puede deshacer.</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+            <a href="{% url 'lista_ordenes' %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: letter;
+            margin: 1.5cm;
+        }
+        * {
+            font-family: Arial, sans-serif;
+        }
+        body {
+            font-size: 10px;
+            color: #222;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            margin-left: -0.3cm;
+        }
+        .logo img {
+            height: 60px;
+        }
+        .empresa-info {
+            text-align: left;
+            font-size: 9px;
+            color: #444;
+        }
+        .contacto-info {
+            text-align: left;
+            font-size: 9px;
+            color: #444;
+        }
+        .titulo {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            margin: 15px 0;
+            padding: 8px 0;
+            color: {{ empresa.color_primario|default:"#1a5276" }};
+        }
+        .seccion-cliente {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .fecha-info {
+            font-size: 10px;
+        }
+        .fecha-info .label-primary {
+            color: {{ empresa.color_primario|default:"#1a5276" }};
+            font-weight: bold;
+        }
+        .cliente-info {
+            text-align: left;
+            font-size: 10px;
+        }
+        .cliente-info .label {
+            color: {{ empresa.color_primario|default:"#1a5276" }};
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        table.facturas {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        table.facturas thead tr {
+            background-color: {{ empresa.color_primario|default:"#1a5276" }};
+            color: white;
+        }
+        table.facturas thead th {
+            padding: 6px 8px;
+            text-align: left;
+            font-size: 9px;
+            text-transform: uppercase;
+        }
+        table.facturas tbody tr {
+            border-bottom: 1px solid #eee;
+        }
+        table.facturas tbody td {
+            padding: 6px 8px;
+            font-size: 9px;
+            vertical-align: top;
+            color: #222;
+        }
+        table.facturas tbody tr:nth-child(even) {
+            background-color: #f5f8fa;
+        }
+        .saldo-total {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+        table.saldo-tabla {
+            width: 40%;
+            border-collapse: collapse;
+        }
+        table.saldo-tabla td {
+            padding: 5px 8px;
+            border-bottom: 1px solid #eee;
+            color: #222;
+            font-size: 10px;
+        }
+        table.saldo-tabla .label-total {
+            color: {{ empresa.color_primario|default:"#1a5276" }};
+            font-weight: bold;
+        }
+        table.saldo-tabla .total-final {
+            background-color: {{ empresa.color_primario|default:"#1a5276" }};
+            color: white !important;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        table.saldo-tabla .total-final td {
+            color: white !important;
+        }
+        .pie-pagina {
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 8px;
+            font-size: 8px;
+            color: #666;
+            text-align: left;
+        }
+        .datos-bancarios {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 8px;
+            color: #444;
+            text-align: left;
+        }
+        .datos-bancarios div {
+            text-align: left;
+        }
+        .text-danger { color: #dc3545; }
+        .text-success { color: #28a745; }
+        .text-warning { color: #ffc107; }
+    </style>
+</head>
+<body>
+
+    <!-- ENCABEZADO -->
+    <div class="header">
+        <div class="logo">
+            <img src="{{ logo_path }}" alt="{{ empresa.nombre|default:'EDGECOM' }}">
+        </div>
+        <div class="empresa-info">
+            <strong>{{ empresa.nombre|default:"EDGECOM" }}</strong><br>
+            {{ empresa.direccion|default:"Alvaro Artiñano, Edificio B, Planta Baja Local 2" }}<br>
+            {{ empresa.codigo_postal|default:"24158" }}, Ciudad del Carmen, Campeche, México<br>
+            {{ empresa.rfc|default:"EDG1602101K9" }}<br>
+            {{ empresa.regimen_fiscal|default:"Régimen General de Ley de Personas Morales" }}
+        </div>
+        <div class="contacto-info">
+            {% if empresa.whatsapp %}Whatsapp Business {{ empresa.whatsapp }}<br>{% else %}Whatsapp Business 938 385 1511<br>{% endif %}
+            {% if empresa.sitio_web %}{{ empresa.sitio_web }}<br>{% else %}www.edgecom.mx<br>{% endif %}
+            {% if empresa.telefono %}Teléfono +52 {{ empresa.telefono }}{% else %}Teléfono +52 938 384 1304{% endif %}
+        </div>
+    </div>
+
+    <!-- TÍTULO -->
+    <div class="titulo">ESTADO DE CUENTA</div>
+
+    <!-- CLIENTE Y FECHA -->
+    <div class="seccion-cliente">
+        <div class="fecha-info">
+            <span class="label-primary">Fecha de emisión</span> <span>{% now "d/m/Y" %}</span>
+        </div>
+        <div class="cliente-info">
+            <div class="label">Cliente</div>
+            <strong>{{ cliente.razon_social }}</strong><br>
+            <span>{{ cliente.rfc }}</span><br>
+            <span>{{ cliente.codigo_postal }}</span><br>
+            <span>{{ cliente.regimen_fiscal }}</span>
+        </div>
+    </div>
+
+    <!-- TABLA DE FACTURAS -->
+    <table class="facturas">
+        <thead>
+            <tr>
+                <th>Folio</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Abono</th>
+                <th>Fecha Vencimiento</th>
+                <th>Saldo Pendiente</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for factura in facturas %}
+            <tr>
+                <td>{{ factura.folio }}</td>
+                <td>${{ factura.total|floatformat:2 }}</td>
+                <td>{{ factura.get_status_display }}</td>
+                <td>
+                    {% if factura.monto_abono %}
+                        ${{ factura.monto_abono|floatformat:2 }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>
+                    {% if factura.fecha_vencimiento %}
+                        {{ factura.fecha_vencimiento }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>
+                    {% if factura.status == 'PAGADO' %}
+                        <span class="text-success">$0.00</span>
+                    {% elif factura.status == 'ABONO' and factura.monto_abono %}
+                        <span class="text-warning">${{ factura.saldo_pendiente|floatformat:2 }}</span>
+                    {% else %}
+                        <span class="text-danger">${{ factura.total|floatformat:2 }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- SALDO TOTAL -->
+    <div class="saldo-total">
+        <table class="saldo-tabla">
+            <tr class="total-final">
+                <td style="color:white !important; font-weight:bold;">SALDO PENDIENTE TOTAL</td>
+                <td style="text-align:right; color:white !important; font-weight:bold;">${{ saldo_total|floatformat:2 }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- PIE DE PÁGINA -->
+    <div class="pie-pagina">
+        {{ empresa.pie_pagina|default:"En caso de aprobación, emitir Orden de compra a nombre de EDGECOM S de RL de CV. La información contenida en este documento es confidencial; EDGECOM no comparte datos de sus clientes y solicita de manera expresa que sus datos no sean compartidos." }}
+        <div class="datos-bancarios">
+            <div>
+                {% if empresa.sitio_web %}
+                    <strong>{{ empresa.sitio_web|upper }}</strong>
+                {% else %}
+                    <strong>WWW.EDGECOM.MX</strong>
+                {% endif %}
+            </div>
+            <div>
+                <strong>{{ empresa.nombre|default:"EDGECOM" }}</strong><br>
+                {{ empresa.rfc|default:"EDG1602101K9" }}<br>
+                {{ empresa.regimen_fiscal|default:"Régimen General de Ley de Personas Morales" }}<br>
+                {{ empresa.direccion|default:"Alvaro Artiñano Aguilar, Edificio B, Planta Baja, Local 2" }}<br>
+                Residencial del Lago, Ciudad del Carmen, Campeche<br>
+                Código Postal {{ empresa.codigo_postal|default:"24158" }}
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

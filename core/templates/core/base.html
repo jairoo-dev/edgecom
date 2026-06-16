@@ -8,79 +8,23 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet">
     <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        .wrapper {
-            display: flex;
-            flex: 1;
-        }
-        .sidebar {
-            width: 220px;
-            min-height: calc(100vh - 56px);
-            background-color: #f8f9fa;
-            border-right: 1px solid #dee2e6;
-            padding: 20px 15px;
-            flex-shrink: 0;
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-        .sidebar.collapsed {
-            width: 0;
-            padding: 0;
-        }
-        .sidebar .usuario-info {
-            text-align: center;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #dee2e6;
-            margin-bottom: 15px;
-            white-space: nowrap;
-        }
-        .sidebar .usuario-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: #0d6efd;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-            margin: 0 auto 10px auto;
-        }
-        .sidebar .usuario-nombre {
-            font-weight: bold;
-            font-size: 14px;
-            color: #222;
-        }
-        .sidebar .usuario-rol {
-            font-size: 12px;
-            color: #666;
-        }
-        .main-content {
-            flex: 1;
-            padding: 20px;
-            background-color: #f1f5f9;
-            transition: all 0.3s ease;
-        }
-        .toggle-btn {
-            cursor: pointer;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 20px;
-            padding: 0 10px;
-        }
-        .toggle-btn:hover {
-            color: #ccc;
-        }
+        body { display: flex; flex-direction: column; min-height: 100vh; }
+        .wrapper { display: flex; flex: 1; }
+        .sidebar { width: 220px; min-height: calc(100vh - 56px); background-color: #f8f9fa; border-right: 1px solid #dee2e6; padding: 20px 15px; flex-shrink: 0; transition: all 0.3s ease; overflow: hidden; }
+        .sidebar.collapsed { width: 0; padding: 0; }
+        .sidebar .usuario-info { text-align: center; padding-bottom: 15px; border-bottom: 1px solid #dee2e6; margin-bottom: 15px; white-space: nowrap; }
+        .sidebar .usuario-avatar { width: 60px; height: 60px; border-radius: 50%; background-color: #0d6efd; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; margin: 0 auto 10px auto; }
+        .sidebar .usuario-nombre { font-weight: bold; font-size: 14px; color: #222; }
+        .sidebar .usuario-rol { font-size: 12px; color: #666; }
+        .sidebar .sidebar-link { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; color: #444; text-decoration: none; font-size: 13px; white-space: nowrap; }
+        .sidebar .sidebar-link:hover { background-color: #e9ecef; color: #0d6efd; }
+        .sidebar .sidebar-opciones { border-top: 1px solid #dee2e6; padding-top: 15px; margin-top: 5px; }
+        .main-content { flex: 1; padding: 20px; background-color: #f1f5f9; transition: all 0.3s ease; }
+        .toggle-btn { cursor: pointer; background: none; border: none; color: white; font-size: 20px; padding: 0 10px; }
+        .toggle-btn:hover { color: #ccc; }
     </style>
 </head>
 <body>
-    <!-- NAVBAR SUPERIOR -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <button class="toggle-btn me-2" id="sidebarToggle">
@@ -106,12 +50,26 @@
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-cart me-1"></i>Compras
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'lista_compras' %}"><i class="bi bi-list-ul me-1"></i>Compras</a></li>
+                            <li><a class="dropdown-item" href="{% url 'buscar_compras' %}"><i class="bi bi-search me-1"></i>Buscar por Proveedor</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'lista_ordenes' %}"><i class="bi bi-file-earmark-text me-1"></i>Órdenes de Compra</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-grid me-1"></i>Catálogo
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{% url 'lista_clientes' %}"><i class="bi bi-people me-1"></i>Clientes</a></li>
+                            <li><a class="dropdown-item" href="{% url 'lista_proveedores' %}"><i class="bi bi-truck me-1"></i>Proveedores</a></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{% url 'lista_productos' %}"><i class="bi bi-box me-1"></i>Productos</a></li>
                             <li><a class="dropdown-item" href="{% url 'lista_servicios' %}"><i class="bi bi-tools me-1"></i>Servicios</a></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{% url 'lista_contactos' %}"><i class="bi bi-person-lines-fill me-1"></i>Directorio</a></li>
                             <li><a class="dropdown-item" href="{% url 'lista_agentes' %}"><i class="bi bi-briefcase me-1"></i>Agentes de Venta</a></li>
                             <li><a class="dropdown-item" href="{% url 'lista_cuentas' %}"><i class="bi bi-bank me-1"></i>Cuentas Bancarias</a></li>
@@ -131,10 +89,7 @@
         </div>
     </nav>
 
-    <!-- WRAPPER: SIDEBAR + CONTENIDO -->
     <div class="wrapper">
-
-        <!-- SIDEBAR -->
         <div class="sidebar collapsed" id="sidebar">
             <div class="usuario-info">
                 <div class="usuario-avatar">
@@ -157,34 +112,31 @@
                     {% endif %}
                 </div>
             </div>
-            <!-- Aquí se agregarán más opciones después -->
+            {% if request.user.is_superuser or request.user.is_staff %}
+            <div class="sidebar-opciones">
+                <a href="{% url 'configuracion' %}" class="sidebar-link">
+                    <i class="bi bi-gear"></i> Configuración
+                </a>
+            </div>
+            {% endif %}
         </div>
 
-        <!-- CONTENIDO PRINCIPAL -->
         <div class="main-content">
             {% block content %}{% endblock %}
         </div>
-
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
-        // Toggle sidebar
         document.getElementById('sidebarToggle').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('collapsed');
+            document.getElementById('sidebar').classList.toggle('collapsed');
         });
-
         $(document).ready(function() {
-            $('select').select2({
-                theme: 'bootstrap-5',
-                width: '100%',
-                placeholder: 'Buscar...',
-                allowClear: true
-            });
+            $('select:not(.no-select2)').select2({ theme: 'bootstrap-5', width: '100%', placeholder: 'Buscar...', allowClear: true });
         });
     </script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>

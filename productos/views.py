@@ -6,20 +6,33 @@ from .models import Producto
 from django.http import JsonResponse
 
 @login_required(login_url='login')
-@permiso_requerido('puede_ver_productos')
 def lista_productos(request):
     productos = Producto.objects.all()
     form = ProductoForm()
-    return render(request, 'productos/lista_productos.html', {'productos': productos, 'form': form})
+    form_con_error = None
+    if request.session.pop('producto_form_errors', None):
+        form_con_error = ProductoForm(request.session.pop('producto_form_data', {}))
+        form_con_error._errors = request.session.pop('producto_form_errors_data', {})
+    return render(request, 'productos/lista_productos.html', {
+        'productos': productos,
+        'form': form_con_error or form,
+        'abrir_modal': form_con_error is not None,
+    })
 
 @login_required(login_url='login')
-@permiso_requerido('puede_ver_productos')
 def agregar_producto(request):
     if request.method == 'POST':
         form = ProductoForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('lista_productos')
+        else:
+            productos = Producto.objects.all()
+            return render(request, 'productos/lista_productos.html', {
+                'productos': productos,
+                'form': form,
+                'abrir_modal': True,
+            })
     return redirect('lista_productos')
 
 @login_required(login_url='login')

@@ -5,20 +5,34 @@ from .forms import ContactoForm
 from .models import Contacto
 
 @login_required(login_url='login')
-@permiso_requerido('puede_ver_directorio')
 def lista_contactos(request):
+    tipo_filtro = request.GET.get('tipo', '')
     contactos = Contacto.objects.all()
+    if tipo_filtro:
+        contactos = contactos.filter(tipo=tipo_filtro)
     form = ContactoForm()
-    return render(request, 'directorio/lista_contactos.html', {'contactos': contactos, 'form': form})
+    return render(request, 'directorio/lista_contactos.html', {
+        'contactos': contactos,
+        'form': form,
+        'tipo_filtro': tipo_filtro,
+    })
 
 @login_required(login_url='login')
-@permiso_requerido('puede_ver_directorio')
 def agregar_contacto(request):
     if request.method == 'POST':
         form = ContactoForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('lista_contactos')
+        else:
+            tipo_filtro = ''
+            contactos = Contacto.objects.all()
+            return render(request, 'directorio/lista_contactos.html', {
+                'contactos': contactos,
+                'form': form,
+                'abrir_modal': True,
+                'tipo_filtro': tipo_filtro,
+            })
     return redirect('lista_contactos')
 
 @login_required(login_url='login')
@@ -32,7 +46,7 @@ def editar_contacto(request, pk):
             return redirect('lista_contactos')
     else:
         form = ContactoForm(instance=contacto)
-    return render(request, 'directorio/editar_contacto.html', {'form': form})
+    return render(request, 'directorio/editar_contacto.html', {'form': form, 'contacto': contacto})
 
 @login_required(login_url='login')
 @permiso_requerido('puede_eliminar')

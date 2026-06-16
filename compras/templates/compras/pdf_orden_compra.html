@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: letter;
+            margin-top: 4.5cm;
+            margin-bottom: 4cm;
+            margin-left: 1.5cm;
+            margin-right: 1.5cm;
+            @top-center { content: element(header); width: 100%; }
+            @bottom-center { content: element(footer); width: 100%; vertical-align: top; padding-top: 0.5cm; }
+        }
+        * { font-family: Arial, sans-serif; }
+        body { font-size: 10px; color: #222; margin: 0; padding: 0; }
+
+        /* Saltos de página */
+        .seccion-folio, .titulo, .header, .totales-seccion, .firmas, .pie-pagina { break-inside: avoid; page-break-inside: avoid; }
+        .totales-seccion, .firmas, .pie-pagina { break-before: avoid; page-break-before: avoid; }
+        table.conceptos thead { display: table-header-group; }
+        table.conceptos tfoot { display: table-footer-group; }
+        table.conceptos tbody tr { break-inside: avoid; page-break-inside: avoid; }
+
+        /* Header fijo */
+        .header {
+            position: running(header);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 20px;
+            margin-left: -0.3cm;
+        }
+        .logo img { height: 60px; }
+        .empresa-info { font-size: 9px; line-height: 1.6; color: #444; }
+        .contacto-info { font-size: 9px; line-height: 1.6; color: #444; text-align: left; }
+
+        /* Pie fijo */
+        .pie-pagina {
+            position: running(footer);
+            width: 100%;
+            border-top: 1px solid #ccc;
+            padding-top: 15px;
+            font-size: 8px;
+            line-height: 1.6;
+            color: #666;
+        }
+
+        /* Título */
+        .titulo {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            margin: 25px 0;
+            color: {{ empresa.color_primario|default:"#1a5276" }};
+        }
+
+        /* Folio y proveedor */
+        .seccion-folio {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+        .folio-info { font-size: 10px; }
+        .folio-info .label { color: {{ empresa.color_primario|default:"#1a5276" }}; font-weight: bold; }
+        .proveedor-info { font-size: 10px; text-align: left; }
+        .proveedor-info .label { color: {{ empresa.color_primario|default:"#1a5276" }}; font-size: 9px; font-weight: bold; text-transform: uppercase; }
+
+        /* Tabla de conceptos */
+        table.conceptos { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
+        table.conceptos thead tr { background-color: {{ empresa.color_primario|default:"#1a5276" }}; color: white; }
+        table.conceptos thead th { padding: 6px 8px; font-size: 9px; text-transform: uppercase; }
+        table.conceptos tbody tr { border-bottom: 1px solid #eee; }
+        table.conceptos tbody tr:nth-child(even) { background-color: #f5f8fa; }
+        table.conceptos tbody td { padding: 10px 8px; font-size: 9px; vertical-align: top; }
+
+        /* Totales y condiciones */
+        .totales-seccion { display: flex; justify-content: space-between; margin-bottom: 25px; }
+        .condiciones { font-size: 9px; width: 55%; }
+        .condiciones h4 { font-size: 10px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; color: {{ empresa.color_primario|default:"#1a5276" }}; }
+        .condiciones p { margin: 2px 0; }
+        .condiciones .label { font-weight: bold; color: {{ empresa.color_primario|default:"#1a5276" }}; }
+        .totales { width: 40%; font-size: 10px; }
+        table.totales-tabla { width: 100%; border-collapse: collapse; }
+        table.totales-tabla td { padding: 5px 8px; border-bottom: 1px solid #eee; }
+        table.totales-tabla .label-total { color: {{ empresa.color_primario|default:"#1a5276" }}; font-weight: bold; }
+        table.totales-tabla .total-final td { background-color: {{ empresa.color_primario|default:"#1a5276" }}; color: white !important; font-weight: bold; font-size: 12px; }
+
+        /* Firmas */
+        .firmas {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 40px;
+            border-top: 1px solid #ccc;
+            padding-top: 15px;
+        }
+        .firma-box { text-align: center; width: 40%; }
+        .firma-linea { border-top: 1px solid #333; margin-top: 40px; padding-top: 5px; font-size: 9px; }
+
+        /* Datos empresa en pie */
+        .datos-empresa {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 8px;
+            line-height: 1.6;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ENCABEZADO -->
+<div class="header">
+    <div class="logo">
+        <img src="{{ logo_path }}" alt="{{ empresa.nombre|default:'EDGECOM' }}">
+    </div>
+    <div class="empresa-info">
+        <strong>{{ empresa.nombre|default:"EDGECOM" }}</strong><br>
+        {{ empresa.direccion|default:"Alvaro Artiñano, Edificio B, Planta Baja Local 2" }}<br>
+        {{ empresa.codigo_postal|default:"24158" }}<br>
+        {{ empresa.rfc|default:"EDG1602101K9" }}<br>
+        {{ empresa.regimen_fiscal|default:"Régimen General de Ley de Personas Morales" }}
+    </div>
+    <div class="contacto-info">
+        Whatsapp Business {{ empresa.whatsapp|default:"938 385 1511" }}<br>
+        {{ empresa.sitio_web|default:"www.edgecom.mx" }}<br>
+        Teléfono +52 {{ empresa.telefono|default:"938 384 1304" }}
+    </div>
+</div>
+
+<!-- TÍTULO -->
+<div class="titulo">ORDEN DE COMPRA</div>
+
+<!-- FOLIO Y PROVEEDOR -->
+<div class="seccion-folio">
+    <div class="folio-info">
+        <span class="label">Folio OC</span> &nbsp;<strong>{{ orden.folio_orden }}</strong><br>
+        <span class="label">Fecha</span> &nbsp;{{ orden.fecha }}<br>
+        {% if orden.folio_cotizacion %}
+        <span class="label">Cot. Proveedor</span> &nbsp;{{ orden.folio_cotizacion }}<br>
+        {% endif %}
+        {% if orden.cotizacion_interna %}
+        <span class="label">Cot. Interna</span> &nbsp;{{ orden.cotizacion_interna }}<br>
+        {% endif %}
+        {% if orden.numero_pedido_cliente %}
+        <span class="label">Pedido Cliente</span> &nbsp;{{ orden.numero_pedido_cliente }}<br>
+        {% endif %}
+        {% if orden.usuario_solicita %}
+        <span class="label">Solicita</span> &nbsp;{{ orden.usuario_solicita.get_full_name|default:orden.usuario_solicita.username }}<br>
+        {% endif %}
+    </div>
+    <div class="proveedor-info">
+        <div class="label">Proveedor</div>
+        <strong>{{ orden.proveedor.nombre }}</strong><br>
+        {% if orden.proveedor.rfc %}<span>{{ orden.proveedor.rfc }}</span><br>{% endif %}
+        {% if orden.proveedor.contacto %}<span>Atención: {{ orden.proveedor.contacto }}</span><br>{% endif %}
+        {% if orden.proveedor.telefono %}<span>Tel: {{ orden.proveedor.telefono }}</span><br>{% endif %}
+        {% if orden.proveedor.email %}<span>{{ orden.proveedor.email }}</span>{% endif %}
+    </div>
+</div>
+
+<!-- CONCEPTOS -->
+<table class="conceptos">
+    <thead>
+        <tr>
+            <th>SKU</th>
+            <th>Descripción</th>
+            <th>Cantidad</th>
+            <th>Costo Unitario</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in detalles %}
+        <tr>
+            <td>{{ d.sku }}</td>
+            <td>{{ d.descripcion }}</td>
+            <td>{{ d.cantidad|floatformat:2 }}</td>
+            <td>${{ d.costo_unitario|floatformat:2 }}</td>
+            <td>${{ d.subtotal|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- TOTALES Y CONDICIONES -->
+<div class="totales-seccion">
+    <div class="condiciones">
+        <h4>Condiciones de Compra</h4>
+        {% if orden.forma_pago %}
+        <p><span class="label">Forma de Pago:</span> {{ orden.get_forma_pago_display }}</p>
+        {% endif %}
+        <p><span class="label">Moneda:</span> {{ orden.moneda }}</p>
+        {% if orden.notas %}
+        <p><span class="label">Notas:</span> {{ orden.notas }}</p>
+        {% endif %}
+    </div>
+    <div class="totales">
+        <table class="totales-tabla">
+            <tr class="total-final">
+                <td>TOTAL</td>
+                <td style="text-align:right;">${{ orden.total|floatformat:2 }}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<!-- FIRMAS -->
+<div class="firmas">
+    <div class="firma-box">
+        <div class="firma-linea">
+            Elaboró<br>
+            {{ orden.usuario_solicita.get_full_name|default:orden.usuario_solicita.username }}
+        </div>
+    </div>
+    <div class="firma-box">
+        <div class="firma-linea">
+            Autorizó<br>
+            {% if orden.autorizado_por %}
+                {{ orden.autorizado_por.get_full_name|default:orden.autorizado_por.username }}
+            {% else %}
+                _______________________
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- PIE DE PÁGINA -->
+<div class="pie-pagina">
+    {{ empresa.pie_pagina|default:"La presente orden de compra está sujeta a los términos y condiciones acordados con el proveedor." }}
+    <div class="datos-empresa">
+        <div></div>
+        <div>
+            <strong>{{ empresa.nombre|default:"EDGECOM" }}</strong><br>
+            {{ empresa.rfc|default:"EDG1602101K9" }}<br>
+            {{ empresa.regimen_fiscal|default:"Régimen General de Ley de Personas Morales" }}<br>
+            {{ empresa.direccion|default:"Alvaro Artiñano Aguilar, Edificio B, Planta Baja, Local 2" }}<br>
+            Código Postal {{ empresa.codigo_postal|default:"24158" }}
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

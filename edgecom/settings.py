@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'clientes',
     'facturas',
     'cotizaciones',
+    'compras',
     'core',
     'productos',
     'servicios',
@@ -29,6 +30,8 @@ INSTALLED_APPS = [
     'agentes',
     'cuentas',
     'usuarios',
+    'configuracion',
+    'proveedores',
 ]
 
 MIDDLEWARE = [

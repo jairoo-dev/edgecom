@@ -33,28 +33,47 @@
                 {{ form.monto_abono }}
             </div>
 
+            <div class="mb-3" id="campo_fecha_pago" style="display:none;">
+                <label class="form-label">Fecha de Pago / Abono</label>
+                {{ form.fecha_pago }}
+            </div>
+
             <div class="mb-3" id="campo_vencimiento" style="display:none;">
                 <label class="form-label">Fecha de Vencimiento</label>
                 {{ form.fecha_vencimiento }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Notas</label>
+                {{ form.notas }}
             </div>
 
             <button type="submit" class="btn btn-warning w-100 mt-3">Guardar Cambios</button>
         </form>
         <a href="{% url 'lista_facturas' %}" class="btn btn-secondary w-100 mt-2">Cancelar</a>
     </div>
+{% endblock %}
 
-    <script>
-        const status = document.getElementById('id_status');
-        const campoAbono = document.getElementById('campo_abono');
-        const campoVencimiento = document.getElementById('campo_vencimiento');
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        var $statusSelect = $('#id_status');
+
+        // Quitar Select2 del select de status y dejarlo como select nativo con estilo Bootstrap
+        $statusSelect.select2('destroy');
+        $statusSelect.addClass('form-select');
 
         function actualizarCampos() {
-            const valor = status.value;
-            campoAbono.style.display = valor === 'ABONO' ? 'block' : 'none';
-            campoVencimiento.style.display = valor === 'CREDITO' ? 'block' : 'none';
+            var valor = $statusSelect.val();
+            $('#campo_abono').toggle(valor === 'ABONO');
+            $('#campo_fecha_pago').toggle(valor === 'PAGADO' || valor === 'ABONO');
+            $('#campo_vencimiento').toggle(valor === 'CREDITO');
         }
 
-        status.addEventListener('change', actualizarCampos);
+        $statusSelect.on('change', actualizarCampos);
+
+        // Ejecutar al cargar para mostrar campos si ya hay un status guardado
         actualizarCampos();
-    </script>
+    });
+</script>
 {% endblock %}

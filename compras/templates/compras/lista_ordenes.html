@@ -1,0 +1,299 @@
+{% extends 'core/base.html' %}
+{% block title %}Órdenes de Compra{% endblock %}
+
+{% block content %}
+<div class="card shadow p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-file-earmark-text me-2"></i>Órdenes de Compra</h2>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarOrden">
+            + Nueva Orden
+        </button>
+    </div>
+
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Folio OC</th>
+                <th>Fecha</th>
+                <th>Proveedor</th>
+                <th>Cotización Prov.</th>
+                <th>Cotización Interna</th>
+                <th>Pedido Cliente</th>
+                <th>Forma Pago</th>
+                <th>Moneda</th>
+                <th>Total</th>
+                <th>Solicitó</th>
+                <th>Autorizó</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for orden in ordenes %}
+            <tr>
+                <td><strong>{{ orden.folio_orden }}</strong></td>
+                <td>{{ orden.fecha }}</td>
+                <td>{{ orden.proveedor.nombre }}</td>
+                <td>{{ orden.folio_cotizacion|default:"—" }}</td>
+                <td>{{ orden.cotizacion_interna|default:"—" }}</td>
+                <td>{{ orden.numero_pedido_cliente|default:"—" }}</td>
+                <td>{{ orden.get_forma_pago_display|default:"—" }}</td>
+                <td>{{ orden.moneda }}</td>
+                <td>${{ orden.total|floatformat:2 }}</td>
+                <td>{{ orden.usuario_solicita.get_full_name|default:orden.usuario_solicita.username }}</td>
+                <td>{{ orden.autorizado_por.get_full_name|default:"—" }}</td>
+                <td>
+                    <a href="{% url 'pdf_orden' orden.folio_orden %}" class="btn btn-info btn-sm" target="_blank">
+                        <i class="bi bi-file-pdf"></i>
+                    </a>
+                    <a href="{% url 'editar_orden' orden.folio_orden %}" class="btn btn-warning btn-sm">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <a href="{% url 'eliminar_orden' orden.folio_orden %}" class="btn btn-danger btn-sm">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="12" class="text-center text-muted py-4">No hay órdenes de compra registradas.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal Nueva Orden -->
+<div class="modal fade" id="modalAgregarOrden" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="bi bi-cart me-1"></i>Nueva Orden de Compra</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'agregar_orden' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label mb-0">Proveedor *</label>
+                                <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalNuevoProveedor">
+                                    <i class="bi bi-plus-circle me-1"></i>Nuevo Proveedor
+                                </button>
+                            </div>
+                            {{ form.proveedor }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Folio Cotización Proveedor</label>
+                            {{ form.folio_cotizacion }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Cotización Interna</label>
+                            {{ form.cotizacion_interna }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Número de Pedido Cliente</label>
+                            {{ form.numero_pedido_cliente }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Forma de Pago</label>
+                            {{ form.forma_pago }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Moneda</label>
+                            {{ form.moneda }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Autorizado por</label>
+                            {{ form.autorizado_por }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Notas</label>
+                            {{ form.notas }}
+                        </div>
+                    </div>
+
+                    <!-- Tabla de productos -->
+                    <h6 class="fw-bold mb-2">Conceptos</h6>
+                    <table class="table table-bordered table-sm" id="tablaConceptos">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>SKU</th>
+                                <th>Descripción</th>
+                                <th>Cantidad</th>
+                                <th>Costo Unitario</th>
+                                <th>Subtotal</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="conceptosBody">
+                            <tr class="fila-concepto">
+                                <td>
+                                    <select name="sku[]" class="form-select form-select-sm sku-select">
+                                        <option value="">— SKU —</option>
+                                        {% for p in productos %}
+                                        <option value="{{ p.sku }}" data-desc="{{ p.descripcion }}" data-precio="{{ p.precio_unitario }}">{{ p.sku }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td><input type="text" name="descripcion[]" class="form-control form-control-sm campo-desc"></td>
+                                <td><input type="number" name="cantidad[]" class="form-control form-control-sm campo-cant" value="1" min="1" step="0.01"></td>
+                                <td><input type="number" name="costo_unitario[]" class="form-control form-control-sm campo-precio" step="0.01" value="0"></td>
+                                <td><input type="number" name="subtotal[]" class="form-control form-control-sm campo-subtotal" step="0.01" value="0" readonly></td>
+                                <td><button type="button" class="btn btn-danger btn-sm btn-eliminar-fila"><i class="bi bi-trash"></i></button></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" class="text-end fw-bold">TOTAL</td>
+                                <td><input type="number" id="totalCalculado" name="total_calculado" class="form-control form-control-sm" value="0" readonly></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <button type="button" class="btn btn-outline-primary btn-sm mt-1" id="btnAgregarFila">
+                        <i class="bi bi-plus"></i> Agregar línea
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function calcularSubtotal(fila) {
+    const cant  = parseFloat(fila.querySelector('.campo-cant').value) || 0;
+    const precio= parseFloat(fila.querySelector('.campo-precio').value) || 0;
+    const sub   = cant * precio;
+    fila.querySelector('.campo-subtotal').value = sub.toFixed(2);
+    calcularTotal();
+}
+
+function calcularTotal() {
+    let total = 0;
+    document.querySelectorAll('.campo-subtotal').forEach(e => total += parseFloat(e.value) || 0);
+    document.getElementById('totalCalculado').value = total.toFixed(2);
+}
+
+function agregarEventosFila(fila) {
+    fila.querySelector('.sku-select').addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        fila.querySelector('.campo-desc').value   = opt.dataset.desc   || '';
+        fila.querySelector('.campo-precio').value = opt.dataset.precio || 0;
+        calcularSubtotal(fila);
+    });
+    fila.querySelector('.campo-cant').addEventListener('input',   () => calcularSubtotal(fila));
+    fila.querySelector('.campo-precio').addEventListener('input', () => calcularSubtotal(fila));
+    fila.querySelector('.btn-eliminar-fila').addEventListener('click', function() {
+        if (document.querySelectorAll('.fila-concepto').length > 1) {
+            fila.remove();
+            calcularTotal();
+        }
+    });
+}
+
+document.querySelectorAll('.fila-concepto').forEach(agregarEventosFila);
+
+document.getElementById('btnAgregarFila').addEventListener('click', function() {
+    const tbody   = document.getElementById('conceptosBody');
+    const primera = tbody.querySelector('.fila-concepto');
+    const nueva   = primera.cloneNode(true);
+    nueva.querySelectorAll('input').forEach(i => i.value = i.type === 'number' ? '0' : '');
+    nueva.querySelector('.sku-select').selectedIndex = 0;
+    nueva.querySelector('.campo-cant').value = 1;
+    tbody.appendChild(nueva);
+    agregarEventosFila(nueva);
+});
+
+// Guardar proveedor rápido
+document.getElementById('btnGuardarProveedor').addEventListener('click', function() {
+    const nombre   = document.getElementById('prov_nombre').value.trim();
+    const rfc      = document.getElementById('prov_rfc').value.trim();
+    const contacto = document.getElementById('prov_contacto').value.trim();
+    const telefono = document.getElementById('prov_telefono').value.trim();
+    const email    = document.getElementById('prov_email').value.trim();
+    const mensaje  = document.getElementById('msg_proveedor');
+
+    if (!nombre) {
+        mensaje.innerHTML = '<div class="alert alert-danger py-1">El nombre es obligatorio.</div>';
+        return;
+    }
+
+    fetch('/proveedores/crear-rapido/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: `nombre=${encodeURIComponent(nombre)}&rfc=${encodeURIComponent(rfc)}&contacto=${encodeURIComponent(contacto)}&telefono=${encodeURIComponent(telefono)}&email=${encodeURIComponent(email)}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            // Agregar al select de proveedor
+            const select = document.getElementById('id_proveedor');
+            const option = new Option(data.nombre, data.id, true, true);
+            select.add(option);
+            // Cerrar modal y limpiar
+            bootstrap.Modal.getInstance(document.getElementById('modalNuevoProveedor')).hide();
+            document.getElementById('prov_nombre').value   = '';
+            document.getElementById('prov_rfc').value      = '';
+            document.getElementById('prov_contacto').value = '';
+            document.getElementById('prov_telefono').value = '';
+            document.getElementById('prov_email').value    = '';
+            mensaje.innerHTML = '';
+        } else {
+            mensaje.innerHTML = `<div class="alert alert-danger py-1">${data.error}</div>`;
+        }
+    });
+});
+</script>
+
+<!-- Modal Nuevo Proveedor Rápido -->
+<div class="modal fade" id="modalNuevoProveedor" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="bi bi-truck me-1"></i>Nuevo Proveedor</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="msg_proveedor"></div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Nombre / Razón Social *</label>
+                        <input type="text" id="prov_nombre" class="form-control" placeholder="Nombre del proveedor">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">RFC</label>
+                        <input type="text" id="prov_rfc" class="form-control" placeholder="RFC">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Contacto</label>
+                        <input type="text" id="prov_contacto" class="form-control" placeholder="Nombre del contacto">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Teléfono</label>
+                        <input type="text" id="prov_telefono" class="form-control" placeholder="Teléfono">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="prov_email" class="form-control" placeholder="correo@ejemplo.com">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btnGuardarProveedor">
+                    <i class="bi bi-save me-1"></i>Guardar y Seleccionar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
