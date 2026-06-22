@@ -170,16 +170,18 @@ def generar_pdf_orden(request, folio):
     detalles = orden.detalles.all()
     empresa = ConfiguracionEmpresa.objects.first()
 
+    # Mismo patrón que cotizaciones: primero intenta logo de empresa, luego el estático
     if empresa and empresa.logo:
-        logo_path = os.path.join(settings.MEDIA_ROOT, str(empresa.logo))
+        logo_raw = os.path.join(settings.MEDIA_ROOT, str(empresa.logo))
     else:
-        logo_path = os.path.join(settings.BASE_DIR, 'core', 'static', 'core', 'logo.png')
-        
+        logo_raw = os.path.join(settings.BASE_DIR, 'core', 'static', 'core', 'logo.png')
+    logo_path = 'file:///' + logo_raw.replace('\\', '/').replace('\\', '/')
+
     html_string = render_to_string('compras/pdf_orden_compra.html', {
         'orden': orden,
         'detalles': detalles,
         'empresa': empresa,
-        'logo_path': f'file:///{logo_path}'.replace('\\', '/'),
+        'logo_path': logo_path,
     })
 
     pdf = HTML(string=html_string).write_pdf()

@@ -55,7 +55,8 @@ def agregar_cotizacion(request):
         form = CotizacionForm(request.POST)
         if form.is_valid():
             cotizacion = form.save(commit=False)
-            cotizacion.total = request.POST.get('total_calculado', 0)
+            total_str = request.POST.get('total_calculado', '0').strip() or '0'
+            cotizacion.total = total_str
             cotizacion.creado_por = request.user
             if agente_usuario:
                 cotizacion.agente = agente_usuario
@@ -68,17 +69,25 @@ def agregar_cotizacion(request):
             precios = request.POST.getlist('precio_unitario[]')
             subtotales = request.POST.getlist('subtotal[]')
             for i in range(len(skus)):
-                if skus[i]:
-                    DetalleCotizacion.objects.create(
-                        cotizacion=cotizacion,
-                        sku=skus[i],
-                        clave_sat=claves_sat[i],
-                        unidad_sat=unidades_sat[i],
-                        descripcion=descripciones[i],
-                        cantidad=cantidades[i],
-                        precio_unitario=precios[i],
-                        subtotal=subtotales[i],
-                    )
+                if skus[i] and skus[i].strip():
+                    try:
+                        cantidad = float(cantidades[i]) if cantidades[i] else 0
+                        precio   = float(precios[i]) if precios[i] else 0
+                        subtotal = float(subtotales[i]) if subtotales[i] else cantidad * precio
+                        if precio == 0:
+                            continue  # omitir líneas sin precio
+                        DetalleCotizacion.objects.create(
+                            cotizacion=cotizacion,
+                            sku=skus[i],
+                            clave_sat=claves_sat[i],
+                            unidad_sat=unidades_sat[i],
+                            descripcion=descripciones[i],
+                            cantidad=cantidad,
+                            precio_unitario=precio,
+                            subtotal=subtotal,
+                        )
+                    except (ValueError, TypeError):
+                        continue
             return redirect('lista_cotizaciones')
     else:
         initial = {'agente': agente_usuario} if agente_usuario else {}

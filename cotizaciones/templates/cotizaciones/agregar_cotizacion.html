@@ -8,16 +8,15 @@
     <a href="{% url 'lista_cotizaciones' %}" class="btn btn-secondary"><i class="bi bi-arrow-left me-1"></i>Regresar</a>
 </div>
 
-<form method="post" action="{% url 'agregar_cotizacion' %}">
+<form method="post" action="{% url 'agregar_cotizacion' %}" id="formCotizacion">
     {% csrf_token %}
     <input type="hidden" name="total_calculado" id="total_calculado">
 
-    <!-- Sección Principal -->
     <div class="card shadow-sm p-4 mb-4">
         <h5 class="fw-bold mb-3">Información General</h5>
         <div class="row g-3">
             <div class="col-md-4">
-                <label class="form-label">Cliente (RFC)</label>
+                <label class="form-label">Cliente</label>
                 {{ form.rfc }}
             </div>
             <div class="col-md-4">
@@ -60,7 +59,6 @@
         </div>
     </div>
 
-    <!-- Conceptos -->
     <div class="card shadow-sm p-4 mb-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="fw-bold mb-0">Conceptos</h5>
@@ -90,12 +88,9 @@
                         <th></th>
                     </tr>
                 </thead>
-                <tbody id="cuerpo-conceptos">
-                </tbody>
+                <tbody id="cuerpo-conceptos"></tbody>
             </table>
         </div>
-
-        <!-- Totales -->
         <div class="row justify-content-end mt-3">
             <div class="col-md-4">
                 <table class="table table-sm">
@@ -116,7 +111,6 @@
         </div>
     </div>
 
-    <!-- Condiciones Comerciales -->
     <div class="card shadow-sm p-4 mb-4">
         <h5 class="fw-bold mb-3">Condiciones Comerciales</h5>
         <div class="row g-3">
@@ -151,7 +145,6 @@
         </div>
     </div>
 
-    <!-- Notas -->
     <div class="card shadow-sm p-4 mb-4">
         <h5 class="fw-bold mb-3">Notas</h5>
         {{ form.notas }}
@@ -163,7 +156,7 @@
     </div>
 </form>
 
-<!-- Modal Nuevo Producto Rápido -->
+<!-- Modal Nuevo Producto -->
 <div class="modal fade" id="modalNuevoProducto" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -174,39 +167,22 @@
             <div class="modal-body">
                 <div id="mensaje-producto"></div>
                 <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">SKU</label>
-                        <input type="text" class="form-control" id="nuevo_sku">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Clave SAT</label>
-                        <input type="text" class="form-control" id="nuevo_clave_sat">
-                    </div>
-                    <div class="col-md-12">
-                        <label class="form-label">Descripción</label>
-                        <input type="text" class="form-control" id="nuevo_descripcion">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Unidad SAT</label>
-                        <input type="text" class="form-control" id="nuevo_unidad_sat">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Precio Unitario</label>
-                        <input type="number" class="form-control" id="nuevo_precio" placeholder="0.00" step="0.01">
-                    </div>
+                    <div class="col-md-6"><label class="form-label">SKU</label><input type="text" class="form-control" id="nuevo_sku"></div>
+                    <div class="col-md-6"><label class="form-label">Clave SAT</label><input type="text" class="form-control" id="nuevo_clave_sat"></div>
+                    <div class="col-md-12"><label class="form-label">Descripción</label><input type="text" class="form-control" id="nuevo_descripcion"></div>
+                    <div class="col-md-6"><label class="form-label">Unidad SAT</label><input type="text" class="form-control" id="nuevo_unidad_sat"></div>
+                    <div class="col-md-6"><label class="form-label">Precio Unitario</label><input type="number" class="form-control" id="nuevo_precio" placeholder="0.00" step="0.01"></div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success" onclick="guardarProductoRapido()">
-                    <i class="bi bi-save me-1"></i>Guardar y Agregar
-                </button>
+                <button type="button" class="btn btn-success" onclick="guardarProductoRapido()"><i class="bi bi-save me-1"></i>Guardar y Agregar</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Nuevo Servicio Rápido -->
+<!-- Modal Nuevo Servicio -->
 <div class="modal fade" id="modalNuevoServicio" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -217,61 +193,32 @@
             <div class="modal-body">
                 <div id="mensaje-servicio"></div>
                 <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">SKU</label>
-                        <input type="text" class="form-control" id="nuevo_sku_serv">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Clave SAT</label>
-                        <input type="text" class="form-control" id="nuevo_clave_sat_serv">
-                    </div>
-                    <div class="col-md-12">
-                        <label class="form-label">Descripción</label>
-                        <input type="text" class="form-control" id="nuevo_descripcion_serv">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Unidad SAT</label>
-                        <input type="text" class="form-control" id="nuevo_unidad_sat_serv">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Precio Unitario</label>
-                        <input type="number" class="form-control" id="nuevo_precio_serv" placeholder="0.00" step="0.01">
-                    </div>
+                    <div class="col-md-6"><label class="form-label">SKU</label><input type="text" class="form-control" id="nuevo_sku_serv"></div>
+                    <div class="col-md-6"><label class="form-label">Clave SAT</label><input type="text" class="form-control" id="nuevo_clave_sat_serv"></div>
+                    <div class="col-md-12"><label class="form-label">Descripción</label><input type="text" class="form-control" id="nuevo_descripcion_serv"></div>
+                    <div class="col-md-6"><label class="form-label">Unidad SAT</label><input type="text" class="form-control" id="nuevo_unidad_sat_serv"></div>
+                    <div class="col-md-6"><label class="form-label">Precio Unitario</label><input type="number" class="form-control" id="nuevo_precio_serv" placeholder="0.00" step="0.01"></div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-info text-white" onclick="guardarServicioRapido()">
-                    <i class="bi bi-save me-1"></i>Guardar y Agregar
-                </button>
+                <button type="button" class="btn btn-info text-white" onclick="guardarServicioRapido()"><i class="bi bi-save me-1"></i>Guardar y Agregar</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Template para línea de concepto -->
+<!-- Template línea -->
 <template id="template-linea">
     <tr>
         <td>
             <select class="form-select form-select-sm sku-select" name="sku[]" style="min-width:120px;">
                 <option value="">Seleccionar...</option>
                 {% for producto in productos %}
-                <option value="{{ producto.sku }}"
-                    data-clave="{{ producto.clave_sat }}"
-                    data-unidad="{{ producto.unidad_sat }}"
-                    data-descripcion="{{ producto.descripcion }}"
-                    data-precio="{{ producto.precio_unitario }}">
-                    {{ producto.sku }}
-                </option>
+                <option value="{{ producto.sku }}" data-clave="{{ producto.clave_sat }}" data-unidad="{{ producto.unidad_sat }}" data-descripcion="{{ producto.descripcion }}" data-precio="{{ producto.precio_unitario }}">{{ producto.sku }}</option>
                 {% endfor %}
                 {% for servicio in servicios %}
-                <option value="{{ servicio.sku }}"
-                    data-clave="{{ servicio.clave_sat }}"
-                    data-unidad="{{ servicio.unidad_sat }}"
-                    data-descripcion="{{ servicio.descripcion }}"
-                    data-precio="{{ servicio.precio_unitario }}">
-                    {{ servicio.sku }}
-                </option>
+                <option value="{{ servicio.sku }}" data-clave="{{ servicio.clave_sat }}" data-unidad="{{ servicio.unidad_sat }}" data-descripcion="{{ servicio.descripcion }}" data-precio="{{ servicio.precio_unitario }}">{{ servicio.sku }}</option>
                 {% endfor %}
             </select>
         </td>
@@ -285,185 +232,184 @@
     </tr>
 </template>
 
+<!-- Toast: líneas vacías -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+    <div id="toastLineasVacias" class="toast align-items-center text-bg-danger border-0" role="alert" data-bs-delay="4000">
+        <div class="d-flex">
+            <div class="toast-body fs-6">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                Agrega un producto o elimina la línea.
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
 <script>
-    const productos = {
-        {% for producto in productos %}
-        "{{ producto.sku }}": {
-            clave_sat: "{{ producto.clave_sat }}",
-            unidad_sat: "{{ producto.unidad_sat }}",
-            descripcion: "{{ producto.descripcion }}",
-            precio_unitario: {{ producto.precio_unitario }}
-        },
-        {% endfor %}
-        {% for servicio in servicios %}
-        "{{ servicio.sku }}": {
-            clave_sat: "{{ servicio.clave_sat }}",
-            unidad_sat: "{{ servicio.unidad_sat }}",
-            descripcion: "{{ servicio.descripcion }}",
-            precio_unitario: {{ servicio.precio_unitario }}
-        },
-        {% endfor %}
-    };
+const catalogoProductos = {
+    {% for producto in productos %}
+    "{{ producto.sku }}": { clave_sat: "{{ producto.clave_sat }}", unidad_sat: "{{ producto.unidad_sat }}", descripcion: "{{ producto.descripcion }}", precio_unitario: {{ producto.precio_unitario }} },
+    {% endfor %}
+    {% for servicio in servicios %}
+    "{{ servicio.sku }}": { clave_sat: "{{ servicio.clave_sat }}", unidad_sat: "{{ servicio.unidad_sat }}", descripcion: "{{ servicio.descripcion }}", precio_unitario: {{ servicio.precio_unitario }} },
+    {% endfor %}
+};
 
-    function agregarLinea() {
-        const template = document.getElementById('template-linea');
-        const clon = template.content.cloneNode(true);
-        const tbody = document.getElementById('cuerpo-conceptos');
-        tbody.appendChild(clon);
-        const nuevaFila = tbody.lastElementChild;
-        nuevaFila.querySelector('.sku-select').addEventListener('change', function() {
-            autocompletarProducto(this);
-        });
-        nuevaFila.querySelector('.cantidad').addEventListener('input', calcularTotales);
-        nuevaFila.querySelector('.precio').addEventListener('input', calcularTotales);
-    }
+function fmt(n) {
+    return '$' + n.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 
-    function autocompletarProducto(select) {
-        const sku = select.value;
-        const fila = select.closest('tr');
-        if (sku && productos[sku]) {
-            const p = productos[sku];
-            fila.querySelector('[name="clave_sat[]"]').value = p.clave_sat;
-            fila.querySelector('[name="unidad_sat[]"]').value = p.unidad_sat;
-            fila.querySelector('[name="descripcion[]"]').value = p.descripcion;
-            fila.querySelector('[name="precio_unitario[]"]').value = p.precio_unitario;
-            calcularTotales();
-        }
-    }
+function agregarLinea() {
+    const clon = document.getElementById('template-linea').content.cloneNode(true);
+    const tbody = document.getElementById('cuerpo-conceptos');
+    tbody.appendChild(clon);
+    const fila = tbody.lastElementChild;
+    fila.querySelector('.sku-select').addEventListener('change', function() { autocompletar(this); });
+    fila.querySelector('.cantidad').addEventListener('input', calcularTotales);
+    fila.querySelector('.precio').addEventListener('input', calcularTotales);
+}
 
-    function eliminarLinea(btn) {
-        btn.closest('tr').remove();
+function autocompletar(select) {
+    const sku = select.value;
+    const fila = select.closest('tr');
+    if (sku && catalogoProductos[sku]) {
+        const p = catalogoProductos[sku];
+        fila.querySelector('[name="clave_sat[]"]').value       = p.clave_sat;
+        fila.querySelector('[name="unidad_sat[]"]').value      = p.unidad_sat;
+        fila.querySelector('[name="descripcion[]"]').value     = p.descripcion;
+        fila.querySelector('[name="precio_unitario[]"]').value = p.precio_unitario;
         calcularTotales();
     }
+}
 
-    function calcularTotales() {
-        let base = 0;
-        document.querySelectorAll('#cuerpo-conceptos tr').forEach(fila => {
-            const cantidad = parseFloat(fila.querySelector('.cantidad').value) || 0;
-            const precio = parseFloat(fila.querySelector('.precio').value) || 0;
-            const subtotal = cantidad * precio;
-            fila.querySelector('.subtotal').value = subtotal.toFixed(2);
-            base += subtotal;
-        });
+function eliminarLinea(btn) {
+    btn.closest('tr').remove();
+    calcularTotales();
+}
 
-        const ivaPct = parseFloat(document.getElementById('id_iva').value) || 0;
-        const iva = base * (ivaPct / 100);
-        const total = base + iva;
+function calcularTotales() {
+    let base = 0;
+    document.querySelectorAll('#cuerpo-conceptos tr').forEach(fila => {
+        const cant   = parseFloat(fila.querySelector('.cantidad').value) || 0;
+        const precio = parseFloat(fila.querySelector('.precio').value)   || 0;
+        const sub    = cant * precio;
+        fila.querySelector('.subtotal').value = sub.toFixed(2);
+        base += sub;
+    });
+    const ivaPct = parseFloat(document.getElementById('id_iva').value) || 0;
+    const iva    = base * (ivaPct / 100);
+    const total  = base + iva;
+    document.getElementById('display-base').textContent  = fmt(base);
+    document.getElementById('display-iva').textContent   = fmt(iva);
+    document.getElementById('display-total').textContent = fmt(total);
+    document.getElementById('total_calculado').value     = total.toFixed(2);
+}
 
-        document.getElementById('display-base').textContent = '$' + base.toFixed(2);
-        document.getElementById('display-iva').textContent = '$' + iva.toFixed(2);
-        document.getElementById('display-total').textContent = '$' + total.toFixed(2);
-        document.getElementById('total_calculado').value = total.toFixed(2);
-    }
-
-    function guardarProductoRapido() {
-        const sku = document.getElementById('nuevo_sku').value;
-        const clave_sat = document.getElementById('nuevo_clave_sat').value;
-        const descripcion = document.getElementById('nuevo_descripcion').value;
-        const unidad_sat = document.getElementById('nuevo_unidad_sat').value;
-        const precio = document.getElementById('nuevo_precio').value;
-
-        fetch('/catalogo/productos/crear-rapido/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: `sku=${sku}&clave_sat=${clave_sat}&descripcion=${descripcion}&unidad_sat=${unidad_sat}&precio_unitario=${precio}`
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                productos[data.sku] = {
-                    clave_sat: data.clave_sat,
-                    unidad_sat: data.unidad_sat,
-                    descripcion: data.descripcion,
-                    precio_unitario: parseFloat(data.precio_unitario)
-                };
-                document.querySelectorAll('.sku-select').forEach(select => {
-                    const option = new Option(data.sku, data.sku);
-                    select.add(option);
-                });
-                bootstrap.Modal.getInstance(document.getElementById('modalNuevoProducto')).hide();
-                document.getElementById('nuevo_sku').value = '';
-                document.getElementById('nuevo_clave_sat').value = '';
-                document.getElementById('nuevo_descripcion').value = '';
-                document.getElementById('nuevo_unidad_sat').value = '';
-                document.getElementById('nuevo_precio').value = '';
-                document.getElementById('mensaje-producto').innerHTML = '';
-            } else {
-                document.getElementById('mensaje-producto').innerHTML = '<div class="alert alert-danger">Error al guardar. Verifica los datos.</div>';
-            }
-        });
-    }
-
-    function guardarServicioRapido() {
-        const sku = document.getElementById('nuevo_sku_serv').value;
-        const clave_sat = document.getElementById('nuevo_clave_sat_serv').value;
-        const descripcion = document.getElementById('nuevo_descripcion_serv').value;
-        const unidad_sat = document.getElementById('nuevo_unidad_sat_serv').value;
-        const precio = document.getElementById('nuevo_precio_serv').value;
-
-        fetch('/catalogo/servicios/crear-rapido/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: `sku=${sku}&clave_sat=${clave_sat}&descripcion=${descripcion}&unidad_sat=${unidad_sat}&precio_unitario=${precio}`
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                productos[data.sku] = {
-                    clave_sat: data.clave_sat,
-                    unidad_sat: data.unidad_sat,
-                    descripcion: data.descripcion,
-                    precio_unitario: parseFloat(data.precio_unitario)
-                };
-                document.querySelectorAll('.sku-select').forEach(select => {
-                    const option = new Option(data.sku, data.sku);
-                    select.add(option);
-                });
-                bootstrap.Modal.getInstance(document.getElementById('modalNuevoServicio')).hide();
-                document.getElementById('nuevo_sku_serv').value = '';
-                document.getElementById('nuevo_clave_sat_serv').value = '';
-                document.getElementById('nuevo_descripcion_serv').value = '';
-                document.getElementById('nuevo_unidad_sat_serv').value = '';
-                document.getElementById('nuevo_precio_serv').value = '';
-                document.getElementById('mensaje-servicio').innerHTML = '';
-            } else {
-                document.getElementById('mensaje-servicio').innerHTML = '<div class="alert alert-danger">Error al guardar. Verifica los datos.</div>';
-            }
-        });
-    }
-
-    document.getElementById('id_iva').addEventListener('change', calcularTotales);
-
-    document.getElementById('id_rfc').addEventListener('change', function() {
-        const rfc = this.value;
-        if (rfc) {
-            fetch(`/cotizaciones/api/cliente/${rfc}/`)
-                .then(r => r.json())
-                .then(data => {
-                    document.getElementById('razon_social').value = data.razon_social;
-                    document.getElementById('codigo_postal').value = data.codigo_postal;
-                });
+function guardarProductoRapido() {
+    const data = {
+        sku: document.getElementById('nuevo_sku').value,
+        clave_sat: document.getElementById('nuevo_clave_sat').value,
+        descripcion: document.getElementById('nuevo_descripcion').value,
+        unidad_sat: document.getElementById('nuevo_unidad_sat').value,
+        precio_unitario: document.getElementById('nuevo_precio').value,
+    };
+    fetch('/catalogo/productos/crear-rapido/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': '{{ csrf_token }}' },
+        body: new URLSearchParams(data)
+    }).then(r => r.json()).then(res => {
+        if (res.success) {
+            catalogoProductos[res.sku] = { clave_sat: res.clave_sat, unidad_sat: res.unidad_sat, descripcion: res.descripcion, precio_unitario: parseFloat(res.precio_unitario) };
+            document.querySelectorAll('.sku-select').forEach(s => s.add(new Option(res.sku, res.sku)));
+            bootstrap.Modal.getInstance(document.getElementById('modalNuevoProducto')).hide();
+            document.getElementById('mensaje-producto').innerHTML = '';
+        } else {
+            document.getElementById('mensaje-producto').innerHTML = '<div class="alert alert-danger py-1">Error al guardar.</div>';
         }
     });
+}
 
-    document.getElementById('id_contacto').addEventListener('change', function() {
-        const pk = this.value;
-        if (pk) {
-            fetch(`/cotizaciones/api/contacto/${pk}/`)
-                .then(r => r.json())
-                .then(data => {
-                    document.getElementById('nombre_contacto').value = data.nombre;
-                    document.getElementById('puesto_contacto').value = data.puesto;
-                });
+function guardarServicioRapido() {
+    const data = {
+        sku: document.getElementById('nuevo_sku_serv').value,
+        clave_sat: document.getElementById('nuevo_clave_sat_serv').value,
+        descripcion: document.getElementById('nuevo_descripcion_serv').value,
+        unidad_sat: document.getElementById('nuevo_unidad_sat_serv').value,
+        precio_unitario: document.getElementById('nuevo_precio_serv').value,
+    };
+    fetch('/catalogo/servicios/crear-rapido/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': '{{ csrf_token }}' },
+        body: new URLSearchParams(data)
+    }).then(r => r.json()).then(res => {
+        if (res.success) {
+            catalogoProductos[res.sku] = { clave_sat: res.clave_sat, unidad_sat: res.unidad_sat, descripcion: res.descripcion, precio_unitario: parseFloat(res.precio_unitario) };
+            document.querySelectorAll('.sku-select').forEach(s => s.add(new Option(res.sku, res.sku)));
+            bootstrap.Modal.getInstance(document.getElementById('modalNuevoServicio')).hide();
+            document.getElementById('mensaje-servicio').innerHTML = '';
+        } else {
+            document.getElementById('mensaje-servicio').innerHTML = '<div class="alert alert-danger py-1">Error al guardar.</div>';
         }
     });
+}
 
-    agregarLinea();
+// Validación al guardar
+document.getElementById('formCotizacion').addEventListener('submit', function(e) {
+    let hayLineasVacias = false;
+    document.querySelectorAll('#cuerpo-conceptos tr').forEach(function(fila) {
+        const precio   = parseFloat(fila.querySelector('.precio').value) || 0;
+        const cantidad = parseFloat(fila.querySelector('.cantidad').value) || 0;
+        const sku      = fila.querySelector('.sku-select').value;
+        fila.querySelector('.subtotal').value = (cantidad * precio).toFixed(2);
+        if (precio === 0 || sku === '') {
+            hayLineasVacias = true;
+            fila.querySelector('.precio').classList.add('is-invalid');
+            fila.querySelector('.sku-select').classList.add('is-invalid');
+        } else {
+            fila.querySelector('.precio').classList.remove('is-invalid');
+            fila.querySelector('.sku-select').classList.remove('is-invalid');
+        }
+    });
+    if (hayLineasVacias) {
+        e.preventDefault();
+        bootstrap.Toast.getOrCreateInstance(document.getElementById('toastLineasVacias')).show();
+        return;
+    }
+    const t = document.getElementById('total_calculado');
+    if (!t.value || !t.value.trim()) t.value = '0';
+});
+
+document.getElementById('id_iva').addEventListener('change', calcularTotales);
+
+$('#id_rfc').on('select2:select', function(e) {
+    fetch(`/cotizaciones/api/cliente/${e.params.data.id}/`)
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('razon_social').value = data.razon_social;
+            document.getElementById('codigo_postal').value = data.codigo_postal;
+        });
+});
+$('#id_rfc').on('select2:unselect', function() {
+    document.getElementById('razon_social').value = '';
+    document.getElementById('codigo_postal').value = '';
+});
+
+$('#id_contacto').on('select2:select', function(e) {
+    fetch(`/cotizaciones/api/contacto/${e.params.data.id}/`)
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('nombre_contacto').value = data.nombre;
+            document.getElementById('puesto_contacto').value = data.puesto;
+        });
+});
+$('#id_contacto').on('select2:unselect', function() {
+    document.getElementById('nombre_contacto').value = '';
+    document.getElementById('puesto_contacto').value = '';
+});
+
+agregarLinea();
 </script>
 {% endblock %}

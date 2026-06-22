@@ -1,4 +1,5 @@
 {% extends 'core/base.html' %}
+{% load edgecom_filters %}
 
 {% block title %}Cotizaciones{% endblock %}
 
@@ -86,7 +87,7 @@
                         </a>
                     </td>
                     <td>{{ cotizacion.rfc_id|default:"—" }}</td>
-                    <td>${{ cotizacion.total }}</td>
+                    <td>${{ cotizacion.total|moneda }}</td>
                     <td>{{ cotizacion.get_status_display|default:"—" }}</td>
                     <td>{{ cotizacion.fecha }}</td>
                     <td>

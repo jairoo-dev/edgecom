@@ -1,4 +1,5 @@
 {% extends 'core/base.html' %}
+{% load edgecom_filters %}
 
 {% block title %}Compras{% endblock %}
 
@@ -67,10 +68,10 @@
                 <td>{{ compra.proveedor.nombre }}</td>
                 <td>{{ compra.fecha|default:"—" }}</td>
                 <td>{{ compra.fecha_vencimiento|default:"—" }}</td>
-                <td>${{ compra.total }}</td>
+                <td>${{ compra.total|moneda }}</td>
                 <td>
                     {% if compra.monto_abono %}
-                        ${{ compra.monto_abono }}
+                        ${{ compra.monto_abono|moneda }}
                     {% else %}
                         <span class="text-muted">—</span>
                     {% endif %}
@@ -79,7 +80,7 @@
                     {% if compra.saldo_pendiente == 0 %}
                         <span class="text-success fw-bold">$0.00</span>
                     {% else %}
-                        <span class="text-danger fw-bold">${{ compra.saldo_pendiente }}</span>
+                        <span class="text-danger fw-bold">${{ compra.saldo_pendiente|moneda }}</span>
                     {% endif %}
                 </td>
                 <td>
@@ -128,7 +129,7 @@
         <tfoot class="table-light">
             <tr>
                 <td colspan="6" class="text-end fw-bold">Saldo total pendiente:</td>
-                <td class="fw-bold text-danger">${{ saldo_total }}</td>
+                <td class="fw-bold text-danger">${{ saldo_total|moneda }}</td>
                 <td colspan="4"></td>
             </tr>
         </tfoot>
@@ -153,7 +154,12 @@
                             {{ form.folio }}
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Proveedor *</label>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label mb-0">Proveedor *</label>
+                                <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalNuevoProveedorCompra">
+                                    <i class="bi bi-plus-circle me-1"></i>Nuevo Proveedor
+                                </button>
+                            </div>
                             {{ form.proveedor }}
                         </div>
                         <div class="col-md-4">
@@ -198,10 +204,97 @@
         </div>
     </div>
 </div>
+<!-- Modal Nuevo Proveedor Rápido -->
+<div class="modal fade" id="modalNuevoProveedorCompra" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="bi bi-truck me-1"></i>Nuevo Proveedor</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="msg_proveedor_compra"></div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Nombre / Razón Social *</label>
+                        <input type="text" id="cprov_nombre" class="form-control" placeholder="Nombre del proveedor">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">RFC</label>
+                        <input type="text" id="cprov_rfc" class="form-control" placeholder="RFC">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Contacto</label>
+                        <input type="text" id="cprov_contacto" class="form-control" placeholder="Nombre del contacto">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Teléfono</label>
+                        <input type="text" id="cprov_telefono" class="form-control" placeholder="Teléfono">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="cprov_email" class="form-control" placeholder="correo@ejemplo.com">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btnGuardarProveedorCompra">
+                    <i class="bi bi-save me-1"></i>Guardar y Seleccionar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
+document.getElementById('btnGuardarProveedorCompra').addEventListener('click', function() {
+    const nombre   = document.getElementById('cprov_nombre').value.trim();
+    const rfc      = document.getElementById('cprov_rfc').value.trim();
+    const contacto = document.getElementById('cprov_contacto').value.trim();
+    const telefono = document.getElementById('cprov_telefono').value.trim();
+    const email    = document.getElementById('cprov_email').value.trim();
+    const mensaje  = document.getElementById('msg_proveedor_compra');
+
+    if (!nombre) {
+        mensaje.innerHTML = '<div class="alert alert-danger py-1">El nombre es obligatorio.</div>';
+        return;
+    }
+
+    fetch('/proveedores/crear-rapido/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: `nombre=${encodeURIComponent(nombre)}&rfc=${encodeURIComponent(rfc)}&contacto=${encodeURIComponent(contacto)}&telefono=${encodeURIComponent(telefono)}&email=${encodeURIComponent(email)}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const select = document.getElementById('id_proveedor');
+            const option = new Option(data.nombre, data.id, true, true);
+            select.add(option);
+            // Actualizar Select2 si está activo
+            if ($(select).data('select2')) {
+                $(select).trigger('change');
+            }
+            bootstrap.Modal.getInstance(document.getElementById('modalNuevoProveedorCompra')).hide();
+            document.getElementById('cprov_nombre').value   = '';
+            document.getElementById('cprov_rfc').value      = '';
+            document.getElementById('cprov_contacto').value = '';
+            document.getElementById('cprov_telefono').value = '';
+            document.getElementById('cprov_email').value    = '';
+            mensaje.innerHTML = '';
+        } else {
+            mensaje.innerHTML = `<div class="alert alert-danger py-1">${data.error}</div>`;
+        }
+    });
+});
+
 $(document).ready(function () {
     // Destruir Select2 en el select de status del modal para usar change nativo
     $('#id_status').select2('destroy');

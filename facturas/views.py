@@ -94,6 +94,25 @@ def buscar_facturas(request):
 
 @login_required(login_url='login')
 @permiso_requerido('puede_ver_facturas')
+def estados_cuenta(request):
+    clientes = Cliente.objects.all().order_by('razon_social')
+    datos = []
+    for cliente in clientes:
+        if request.user.is_superuser or request.user.is_staff:
+            facturas = Factura.objects.filter(rfc=cliente.rfc)
+        else:
+            facturas = Factura.objects.filter(rfc=cliente.rfc, creado_por=request.user)
+        saldo = sum(f.saldo_pendiente() for f in facturas)
+        datos.append({
+            'cliente': cliente,
+            'total_facturas': facturas.count(),
+            'saldo_pendiente': saldo,
+        })
+    datos.sort(key=lambda x: x['saldo_pendiente'], reverse=True)
+    return render(request, 'facturas/estados_cuenta.html', {'datos': datos})
+
+@login_required(login_url='login')
+@permiso_requerido('puede_ver_facturas')
 def estado_cuenta_pdf(request, rfc):
     cliente = get_object_or_404(Cliente, rfc=rfc)
     if request.user.is_superuser or request.user.is_staff:

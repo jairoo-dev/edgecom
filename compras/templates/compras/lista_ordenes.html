@@ -1,4 +1,5 @@
 {% extends 'core/base.html' %}
+{% load edgecom_filters %}
 {% block title %}Órdenes de Compra{% endblock %}
 
 {% block content %}
@@ -38,7 +39,7 @@
                 <td>{{ orden.numero_pedido_cliente|default:"—" }}</td>
                 <td>{{ orden.get_forma_pago_display|default:"—" }}</td>
                 <td>{{ orden.moneda }}</td>
-                <td>${{ orden.total|floatformat:2 }}</td>
+                <td>${{ orden.total|moneda }}</td>
                 <td>{{ orden.usuario_solicita.get_full_name|default:orden.usuario_solicita.username }}</td>
                 <td>{{ orden.autorizado_por.get_full_name|default:"—" }}</td>
                 <td>

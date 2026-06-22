@@ -1,0 +1,62 @@
+{% extends 'core/base.html' %}
+{% load edgecom_filters %}
+
+{% block title %}Estados de Cuenta{% endblock %}
+
+{% block content %}
+<div class="card shadow p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-file-earmark-text me-2"></i>Estados de Cuenta</h2>
+        <a href="{% url 'buscar_facturas' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-search me-1"></i>Buscar por RFC
+        </a>
+    </div>
+
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Cliente</th>
+                <th>RFC</th>
+                <th>Facturas</th>
+                <th>Saldo Pendiente</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for d in datos %}
+            <tr>
+                <td class="fw-bold">{{ d.cliente.razon_social }}</td>
+                <td class="text-muted">{{ d.cliente.rfc }}</td>
+                <td>
+                    {% if d.total_facturas %}
+                        <span class="badge bg-secondary">{{ d.total_facturas }}</span>
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if d.saldo_pendiente > 0 %}
+                        <span class="text-danger fw-bold">${{ d.saldo_pendiente|moneda }}</span>
+                    {% else %}
+                        <span class="text-success fw-bold">$0.00</span>
+                    {% endif %}
+                </td>
+                <td class="text-end">
+                    {% if d.total_facturas %}
+                    <a href="{% url 'estado_cuenta_pdf' d.cliente.rfc %}" target="_blank" class="btn btn-success btn-sm">
+                        <i class="bi bi-file-earmark-pdf me-1"></i>Estado de Cuenta
+                    </a>
+                    {% else %}
+                        <span class="text-muted small">Sin facturas</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center text-muted py-4">No hay clientes registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

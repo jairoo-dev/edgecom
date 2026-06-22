@@ -42,6 +42,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{% url 'lista_facturas' %}"><i class="bi bi-list-ul me-1"></i>Ver todas</a></li>
+                            <li><a class="dropdown-item" href="{% url 'estados_cuenta' %}"><i class="bi bi-file-earmark-text me-1"></i>Estados de Cuenta</a></li>
                             <li><a class="dropdown-item" href="{% url 'buscar_facturas' %}"><i class="bi bi-search me-1"></i>Buscar por RFC</a></li>
                         </ul>
                     </li>
@@ -135,6 +136,7 @@
         });
         $(document).ready(function() {
             $('select:not(.no-select2)').select2({ theme: 'bootstrap-5', width: '100%', placeholder: 'Buscar...', allowClear: true });
+            if (typeof window.afterSelect2 === 'function') window.afterSelect2();
         });
     </script>
     {% block scripts %}{% endblock %}

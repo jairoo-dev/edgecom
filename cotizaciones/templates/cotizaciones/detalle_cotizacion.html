@@ -1,4 +1,5 @@
 {% extends 'core/base.html' %}
+{% load edgecom_filters %}
 
 {% block title %}Cotización {{ cotizacion.folio }}{% endblock %}
 
@@ -112,8 +113,8 @@
                 <td>{{ detalle.unidad_sat }}</td>
                 <td>{{ detalle.descripcion }}</td>
                 <td>{{ detalle.cantidad|floatformat:2 }}</td>
-                <td>${{ detalle.precio_unitario|floatformat:2 }}</td>
-                <td>${{ detalle.subtotal|floatformat:2 }}</td>
+                <td>${{ detalle.precio_unitario|moneda }}</td>
+                <td>${{ detalle.subtotal|moneda }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -125,15 +126,15 @@
             <table class="table table-sm">
                 <tr>
                     <td class="text-muted">Base:</td>
-                    <td class="text-end fw-bold">${{ base|floatformat:2 }}</td>
+                    <td class="text-end fw-bold">${{ base|moneda }}</td>
                 </tr>
                 <tr>
                     <td class="text-muted">IVA ({{ cotizacion.iva }}%):</td>
-                    <td class="text-end fw-bold">${{ monto_iva|floatformat:2 }}</td>
+                    <td class="text-end fw-bold">${{ monto_iva|moneda }}</td>
                 </tr>
                 <tr class="table-dark">
                     <td class="fw-bold">Total:</td>
-                    <td class="text-end fw-bold">${{ cotizacion.total|floatformat:2 }}</td>
+                    <td class="text-end fw-bold">${{ cotizacion.total|moneda }}</td>
                 </tr>
             </table>
         </div>

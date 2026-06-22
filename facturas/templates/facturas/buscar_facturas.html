@@ -1,4 +1,5 @@
 {% extends 'core/base.html' %}
+{% load edgecom_filters %}
 
 {% block title %}Buscar Facturas{% endblock %}
 
@@ -38,11 +39,11 @@
                         {% for factura in facturas %}
                         <tr>
                             <td>{{ factura.folio }}</td>
-                            <td>${{ factura.total }}</td>
+                            <td>${{ factura.total|moneda }}</td>
                             <td>{{ factura.get_status_display }}</td>
                             <td>
                                 {% if factura.monto_abono %}
-                                    ${{ factura.monto_abono }}
+                                    ${{ factura.monto_abono|moneda }}
                                 {% else %}
                                     —
                                 {% endif %}
@@ -51,9 +52,9 @@
                                 {% if factura.status == 'PAGADO' %}
                                     <span class="text-success fw-bold">$0.00</span>
                                 {% elif factura.status == 'ABONO' and factura.monto_abono %}
-                                    <span class="text-warning fw-bold">${{ factura.saldo_pendiente }}</span>
+                                    <span class="text-warning fw-bold">${{ factura.saldo_pendiente|moneda }}</span>
                                 {% else %}
-                                    <span class="text-danger fw-bold">${{ factura.total }}</span>
+                                    <span class="text-danger fw-bold">${{ factura.total|moneda }}</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -63,7 +64,7 @@
 
                 <div class="card mt-3 p-3 text-end">
                     <h5>Saldo Pendiente Total:
-                        <span class="text-danger fw-bold">${{ saldo_total }}</span>
+                        <span class="text-danger fw-bold">${{ saldo_total|moneda }}</span>
                     </h5>
                 </div>
 
