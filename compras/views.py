@@ -10,10 +10,12 @@ from .models import Compra, OrdenCompra, DetalleOrdenCompra
 from .forms import CompraForm, OrdenCompraForm
 from productos.models import Producto
 from configuracion.models import ConfiguracionEmpresa
+from usuarios.decoradores import permiso_requerido
 
 # ── COMPRAS ──────────────────────────────────────────────────────────────────
 
 @login_required(login_url='login')
+@permiso_requerido('puede_ver_compras')
 def lista_compras(request):
     status_filtro = request.GET.get('status', '')
     compras = Compra.objects.select_related('proveedor').all()
@@ -29,6 +31,7 @@ def lista_compras(request):
     })
 
 @login_required(login_url='login')
+@permiso_requerido('puede_ver_compras')
 def agregar_compra(request):
     if request.method == 'POST':
         form = CompraForm(request.POST)
@@ -39,6 +42,7 @@ def agregar_compra(request):
     return redirect('lista_compras')
 
 @login_required(login_url='login')
+@permiso_requerido('puede_editar')
 def editar_compra(request, folio):
     compra = get_object_or_404(Compra, folio=folio)
     if request.method == 'POST':
@@ -51,6 +55,7 @@ def editar_compra(request, folio):
     return render(request, 'compras/editar_compra.html', {'form': form, 'compra': compra})
 
 @login_required(login_url='login')
+@permiso_requerido('puede_eliminar')
 def eliminar_compra(request, folio):
     compra = get_object_or_404(Compra, folio=folio)
     if request.method == 'POST':
@@ -77,6 +82,7 @@ def buscar_compras(request):
 # ── ÓRDENES DE COMPRA ─────────────────────────────────────────────────────────
 
 @login_required(login_url='login')
+@permiso_requerido('puede_ver_compras')
 def lista_ordenes(request):
     ordenes = OrdenCompra.objects.select_related('proveedor', 'usuario_solicita', 'autorizado_por').all()
     form = OrdenCompraForm()
@@ -88,6 +94,7 @@ def lista_ordenes(request):
     })
 
 @login_required(login_url='login')
+@permiso_requerido('puede_ver_compras')
 def agregar_orden(request):
     if request.method == 'POST':
         form = OrdenCompraForm(request.POST)
@@ -120,6 +127,7 @@ def agregar_orden(request):
     return redirect('lista_ordenes')
 
 @login_required(login_url='login')
+@permiso_requerido('puede_editar')
 def editar_orden(request, folio):
     orden = get_object_or_404(OrdenCompra, folio_orden=folio)
     if request.method == 'POST':
@@ -157,6 +165,7 @@ def editar_orden(request, folio):
     return render(request, 'compras/editar_orden.html', {'form': form, 'orden': orden, 'detalles': detalles, 'productos': productos})
 
 @login_required(login_url='login')
+@permiso_requerido('puede_eliminar')
 def eliminar_orden(request, folio):
     orden = get_object_or_404(OrdenCompra, folio_orden=folio)
     if request.method == 'POST':

@@ -72,6 +72,34 @@
 
         $statusSelect.on('change', actualizarCampos);
 
+        // Permitir buscar el cliente por RFC o por razón social, aunque el
+        // texto visible de cada opción sea solo el RFC.
+        function matchClienteOMatch(params, data) {
+            if (!params.term || params.term.trim() === '') {
+                return data;
+            }
+            if (typeof data.text === 'undefined') {
+                return null;
+            }
+            var term = params.term.toLowerCase();
+            var texto = data.text.toLowerCase();
+            var razonSocial = (data.element && data.element.getAttribute('data-razon-social') || '').toLowerCase();
+            if (texto.indexOf(term) > -1 || razonSocial.indexOf(term) > -1) {
+                return data;
+            }
+            return null;
+        }
+
+        var $clienteSelect = $('#id_rfc');
+        $clienteSelect.select2('destroy');
+        $clienteSelect.select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            placeholder: 'Buscar por RFC o razón social...',
+            allowClear: true,
+            matcher: matchClienteOMatch,
+        });
+
         // Ejecutar al cargar para mostrar campos si ya hay un status guardado
         actualizarCampos();
     });

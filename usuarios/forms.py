@@ -10,6 +10,7 @@ class RolForm(forms.ModelForm):
             'puede_ver_facturas', 'puede_ver_cotizaciones',
             'puede_ver_clientes', 'puede_ver_productos', 'puede_ver_servicios',
             'puede_ver_directorio', 'puede_ver_agentes', 'puede_ver_cuentas',
+            'puede_ver_compras', 'puede_ver_proveedores',
             'puede_editar', 'puede_eliminar',
         ]
         widgets = {
@@ -23,6 +24,8 @@ class RolForm(forms.ModelForm):
             'puede_ver_directorio': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'puede_ver_agentes': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'puede_ver_cuentas': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'puede_ver_compras': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'puede_ver_proveedores': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'puede_editar': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'puede_eliminar': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }

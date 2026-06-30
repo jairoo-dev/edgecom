@@ -6,8 +6,9 @@ from .models import Producto
 from django.http import JsonResponse
 
 @login_required(login_url='login')
+@permiso_requerido('puede_ver_productos')
 def lista_productos(request):
-    productos = Producto.objects.all()
+    productos = Producto.objects.all().order_by('-fecha_creacion')
     form = ProductoForm()
     form_con_error = None
     if request.session.pop('producto_form_errors', None):
@@ -20,6 +21,7 @@ def lista_productos(request):
     })
 
 @login_required(login_url='login')
+@permiso_requerido('puede_ver_productos')
 def agregar_producto(request):
     if request.method == 'POST':
         form = ProductoForm(request.POST)
@@ -27,7 +29,7 @@ def agregar_producto(request):
             form.save()
             return redirect('lista_productos')
         else:
-            productos = Producto.objects.all()
+            productos = Producto.objects.all().order_by('-fecha_creacion')
             return render(request, 'productos/lista_productos.html', {
                 'productos': productos,
                 'form': form,

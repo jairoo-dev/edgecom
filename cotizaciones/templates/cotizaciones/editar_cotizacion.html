@@ -17,7 +17,7 @@
         <h5 class="fw-bold mb-3">Información General</h5>
         <div class="row g-3">
             <div class="col-md-4">
-                <label class="form-label">Cliente (RFC)</label>
+                <label class="form-label">Cliente</label>
                 {{ form.rfc }}
             </div>
             <div class="col-md-4">
@@ -291,7 +291,8 @@ function agregarLinea() {
     const tbody = document.getElementById('cuerpo-conceptos');
     tbody.appendChild(clon);
     const fila = tbody.lastElementChild;
-    fila.querySelector('.sku-select').addEventListener('change', function() { autocompletar(this); });
+    const $skuSelect = $(fila.querySelector('.sku-select'));
+    $skuSelect.on('change select2:select select2:unselect', function() { autocompletar(this); });
     fila.querySelector('.cantidad').addEventListener('input', calcularTotales);
     fila.querySelector('.precio').addEventListener('input', calcularTotales);
 }
@@ -382,7 +383,8 @@ function guardarServicioRapido() {
 
 // Listeners para las filas ya existentes (vienen del servidor)
 document.querySelectorAll('#cuerpo-conceptos tr').forEach(function(fila) {
-    fila.querySelector('.sku-select').addEventListener('change', function() { autocompletar(this); });
+    const $skuSelect = $(fila.querySelector('.sku-select'));
+    $skuSelect.on('change select2:select select2:unselect', function() { autocompletar(this); });
     fila.querySelector('.cantidad').addEventListener('input', calcularTotales);
     fila.querySelector('.precio').addEventListener('input', calcularTotales);
 });
@@ -415,7 +417,7 @@ document.getElementById('formCotizacion').addEventListener('submit', function(e)
 
 document.getElementById('id_iva').addEventListener('change', calcularTotales);
 
-// Autocomplete RFC y Contacto (eventos de Select2, corre dentro de {% block scripts %})
+// Autocomplete RFC y Contacto (eventos de Select2)
 $('#id_rfc').on('select2:select', function(e) {
     fetch(`/cotizaciones/api/cliente/${e.params.data.id}/`)
         .then(r => r.json())
@@ -445,6 +447,34 @@ $('#id_contacto').on('select2:unselect', function() {
 // Se ejecuta después de que Select2 ya inicializó todos los <select> de la página
 window.afterSelect2 = function() {
     calcularTotales();
+
+    // Permitir buscar el cliente por RFC o por razón social, aunque el
+    // texto visible de cada opción sea solo el RFC.
+    function matchClienteOMatch(params, data) {
+        if (!params.term || params.term.trim() === '') {
+            return data;
+        }
+        if (typeof data.text === 'undefined') {
+            return null;
+        }
+        var term = params.term.toLowerCase();
+        var texto = data.text.toLowerCase();
+        var razonSocial = (data.element && data.element.getAttribute('data-razon-social') || '').toLowerCase();
+        if (texto.indexOf(term) > -1 || razonSocial.indexOf(term) > -1) {
+            return data;
+        }
+        return null;
+    }
+
+    var $clienteSelect = $('#id_rfc');
+    $clienteSelect.select2('destroy');
+    $clienteSelect.select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: 'Buscar por RFC o razón social...',
+        allowClear: true,
+        matcher: matchClienteOMatch,
+    });
 };
 
 calcularTotales();

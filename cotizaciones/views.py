@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
 from decimal import Decimal
@@ -22,11 +23,16 @@ from usuarios.decoradores import permiso_requerido
 def lista_cotizaciones(request):
     agente_filtro = request.GET.get('agente', '')
     status_filtro = request.GET.get('status', '')
+    usuario_filtro = request.GET.get('usuario', '')
 
     if request.user.is_superuser or request.user.is_staff:
         cotizaciones = Cotizacion.objects.all()
         if agente_filtro:
             cotizaciones = cotizaciones.filter(agente__id=agente_filtro)
+        if usuario_filtro == 'sin_usuario':
+            cotizaciones = cotizaciones.filter(creado_por__isnull=True)
+        elif usuario_filtro:
+            cotizaciones = cotizaciones.filter(creado_por__id=usuario_filtro)
     else:
         cotizaciones = Cotizacion.objects.filter(creado_por=request.user)
 
@@ -34,13 +40,42 @@ def lista_cotizaciones(request):
         cotizaciones = cotizaciones.filter(status=status_filtro)
 
     agentes = Agente.objects.all()
+    usuarios = User.objects.all().order_by('username') if (request.user.is_superuser or request.user.is_staff) else None
     form = CotizacionForm()
     return render(request, 'cotizaciones/lista_cotizaciones.html', {
         'cotizaciones': cotizaciones,
         'form': form,
         'agentes': agentes,
+        'usuarios': usuarios,
         'agente_filtro': agente_filtro,
         'status_filtro': status_filtro,
+        'usuario_filtro': usuario_filtro,
+    })
+
+@login_required(login_url='login')
+@permiso_requerido('puede_ver_cotizaciones')
+def buscar_cotizaciones(request):
+    cotizaciones = []
+    rfc = ''
+    cliente = None
+    total_general = 0
+    if request.method == 'POST':
+        rfc = request.POST.get('rfc', '')
+        if rfc:
+            if request.user.is_superuser or request.user.is_staff:
+                cotizaciones = Cotizacion.objects.filter(rfc=rfc)
+            else:
+                cotizaciones = Cotizacion.objects.filter(rfc=rfc, creado_por=request.user)
+            total_general = sum(c.total for c in cotizaciones)
+            try:
+                cliente = Cliente.objects.get(rfc=rfc)
+            except Cliente.DoesNotExist:
+                cliente = None
+    return render(request, 'cotizaciones/buscar_cotizaciones.html', {
+        'cotizaciones': cotizaciones,
+        'rfc': rfc,
+        'cliente': cliente,
+        'total_general': total_general,
     })
 
 @login_required(login_url='login')

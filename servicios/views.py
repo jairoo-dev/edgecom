@@ -6,12 +6,14 @@ from .forms import ServicioForm
 from .models import Servicio
 
 @login_required(login_url='login')
+@permiso_requerido('puede_ver_servicios')
 def lista_servicios(request):
-    servicios = Servicio.objects.all()
+    servicios = Servicio.objects.all().order_by('-fecha_creacion')
     form = ServicioForm()
     return render(request, 'servicios/lista_servicios.html', {'servicios': servicios, 'form': form})
 
 @login_required(login_url='login')
+@permiso_requerido('puede_ver_servicios')
 def agregar_servicio(request):
     if request.method == 'POST':
         form = ServicioForm(request.POST)
@@ -19,7 +21,7 @@ def agregar_servicio(request):
             form.save()
             return redirect('lista_servicios')
         else:
-            servicios = Servicio.objects.all()
+            servicios = Servicio.objects.all().order_by('-fecha_creacion')
             return render(request, 'servicios/lista_servicios.html', {
                 'servicios': servicios,
                 'form': form,

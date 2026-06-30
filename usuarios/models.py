@@ -15,6 +15,8 @@ class Rol(models.Model):
     puede_ver_directorio = models.BooleanField(default=False)
     puede_ver_agentes = models.BooleanField(default=False)
     puede_ver_cuentas = models.BooleanField(default=False)
+    puede_ver_compras = models.BooleanField(default=False)
+    puede_ver_proveedores = models.BooleanField(default=False)
 
     # Acciones
     puede_editar = models.BooleanField(default=False)

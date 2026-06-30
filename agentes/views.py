@@ -7,7 +7,7 @@ from .models import Agente
 @login_required(login_url='login')
 @permiso_requerido('puede_ver_agentes')
 def lista_agentes(request):
-    agentes = Agente.objects.all()
+    agentes = Agente.objects.all().order_by('-fecha_creacion')
     form = AgenteForm()
     return render(request, 'agentes/lista_agentes.html', {'agentes': agentes, 'form': form})
 
@@ -20,7 +20,7 @@ def agregar_agente(request):
             form.save()
             return redirect('lista_agentes')
         else:
-            agentes = Agente.objects.all()
+            agentes = Agente.objects.all().order_by('-fecha_creacion')
             return render(request, 'agentes/lista_agentes.html', {
                 'agentes': agentes,
                 'form': form,

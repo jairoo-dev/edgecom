@@ -22,6 +22,7 @@ class Factura(models.Model):
     notas = models.TextField(blank=True, null=True)
     agente = models.ForeignKey(Agente, on_delete=models.SET_NULL, null=True, blank=True, related_name='facturas')
     creado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='facturas')
+    fecha_creacion = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
         return self.folio

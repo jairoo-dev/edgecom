@@ -3,11 +3,13 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .models import Proveedor
 from .forms import ProveedorForm
+from usuarios.decoradores import permiso_requerido
 
 @login_required(login_url='login')
+@permiso_requerido('puede_ver_proveedores')
 def lista_proveedores(request):
     query = request.GET.get('q', '')
-    proveedores = Proveedor.objects.all()
+    proveedores = Proveedor.objects.all().order_by('-fecha_creacion')
     if query:
         proveedores = proveedores.filter(nombre__icontains=query)
     form = ProveedorForm()
@@ -18,6 +20,7 @@ def lista_proveedores(request):
     })
 
 @login_required(login_url='login')
+@permiso_requerido('puede_ver_proveedores')
 def agregar_proveedor(request):
     if request.method == 'POST':
         form = ProveedorForm(request.POST)
@@ -26,6 +29,7 @@ def agregar_proveedor(request):
     return redirect('lista_proveedores')
 
 @login_required(login_url='login')
+@permiso_requerido('puede_editar')
 def editar_proveedor(request, pk):
     proveedor = get_object_or_404(Proveedor, pk=pk)
     if request.method == 'POST':
@@ -38,6 +42,7 @@ def editar_proveedor(request, pk):
     return render(request, 'proveedores/editar_proveedor.html', {'form': form, 'proveedor': proveedor})
 
 @login_required(login_url='login')
+@permiso_requerido('puede_eliminar')
 def eliminar_proveedor(request, pk):
     proveedor = get_object_or_404(Proveedor, pk=pk)
     if request.method == 'POST':

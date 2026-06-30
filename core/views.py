@@ -26,11 +26,19 @@ def logout_view(request):
 @login_required(login_url='login')
 def dashboard(request):
     total_clientes = Cliente.objects.count()
-    total_facturas = Factura.objects.count()
-    total_cotizaciones = Cotizacion.objects.count()
-    total_facturado = Factura.objects.aggregate(Sum('total'))['total__sum'] or 0
-    ultimas_facturas = Factura.objects.order_by('-folio')[:5]
-    ultimas_cotizaciones = Cotizacion.objects.order_by('-folio')[:5]
+
+    if request.user.is_superuser or request.user.is_staff:
+        facturas_qs = Factura.objects.all()
+        cotizaciones_qs = Cotizacion.objects.all()
+    else:
+        facturas_qs = Factura.objects.filter(creado_por=request.user)
+        cotizaciones_qs = Cotizacion.objects.filter(creado_por=request.user)
+
+    total_facturas = facturas_qs.count()
+    total_cotizaciones = cotizaciones_qs.count()
+    total_facturado = facturas_qs.aggregate(Sum('total'))['total__sum'] or 0
+    ultimas_facturas = facturas_qs.order_by('-folio')[:5]
+    ultimas_cotizaciones = cotizaciones_qs.order_by('-folio')[:5]
 
     context = {
         'total_clientes': total_clientes,

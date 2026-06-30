@@ -5,9 +5,10 @@ from .forms import ContactoForm
 from .models import Contacto
 
 @login_required(login_url='login')
+@permiso_requerido('puede_ver_directorio')
 def lista_contactos(request):
     tipo_filtro = request.GET.get('tipo', '')
-    contactos = Contacto.objects.all()
+    contactos = Contacto.objects.all().order_by('-fecha_creacion')
     if tipo_filtro:
         contactos = contactos.filter(tipo=tipo_filtro)
     form = ContactoForm()
@@ -18,6 +19,7 @@ def lista_contactos(request):
     })
 
 @login_required(login_url='login')
+@permiso_requerido('puede_ver_directorio')
 def agregar_contacto(request):
     if request.method == 'POST':
         form = ContactoForm(request.POST)
@@ -26,7 +28,7 @@ def agregar_contacto(request):
             return redirect('lista_contactos')
         else:
             tipo_filtro = ''
-            contactos = Contacto.objects.all()
+            contactos = Contacto.objects.all().order_by('-fecha_creacion')
             return render(request, 'directorio/lista_contactos.html', {
                 'contactos': contactos,
                 'form': form,

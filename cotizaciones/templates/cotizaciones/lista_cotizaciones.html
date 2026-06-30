@@ -7,9 +7,14 @@
     <div class="card shadow p-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Cotizaciones</h2>
-            <a href="{% url 'agregar_cotizacion' %}" class="btn btn-primary">
-                <i class="bi bi-plus me-1"></i>Nueva Cotización
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{% url 'buscar_cotizaciones' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-search me-1"></i>Buscar por RFC
+                </a>
+                <a href="{% url 'agregar_cotizacion' %}" class="btn btn-primary">
+                    <i class="bi bi-plus me-1"></i>Nueva Cotización
+                </a>
+            </div>
         </div>
 
         <!-- Filtros -->
@@ -51,12 +56,43 @@
                         {% endif %}
                     </button>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item {% if not agente_filtro %}active{% endif %}" href="{% url 'lista_cotizaciones' %}{% if status_filtro %}?status={{ status_filtro }}{% endif %}">Todos los agentes</a></li>
+                        <li><a class="dropdown-item {% if not agente_filtro %}active{% endif %}" href="{% url 'lista_cotizaciones' %}{% if status_filtro %}?status={{ status_filtro }}{% endif %}{% if usuario_filtro %}{% if status_filtro %}&{% else %}?{% endif %}usuario={{ usuario_filtro }}{% endif %}">Todos los agentes</a></li>
                         {% for agente in agentes %}
                         <li>
                             <a class="dropdown-item {% if agente.id|stringformat:'s' == agente_filtro %}active{% endif %}"
-                               href="{% url 'lista_cotizaciones' %}?agente={{ agente.id }}{% if status_filtro %}&status={{ status_filtro }}{% endif %}">
+                               href="{% url 'lista_cotizaciones' %}?agente={{ agente.id }}{% if status_filtro %}&status={{ status_filtro }}{% endif %}{% if usuario_filtro %}&usuario={{ usuario_filtro }}{% endif %}">
                                 {{ agente.nombre }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Filtro por usuario que registró (solo admin) -->
+            <div class="d-flex align-items-center gap-2">
+                <label class="form-label mb-0 fw-bold">Usuario:</label>
+                <div class="dropdown">
+                    <button class="btn btn-outline-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        {% if usuario_filtro == 'sin_usuario' %}
+                            Sin usuario asignado
+                        {% elif usuario_filtro %}
+                            {% for usuario in usuarios %}
+                                {% if usuario.id|stringformat:"s" == usuario_filtro %}{{ usuario.username }}{% endif %}
+                            {% endfor %}
+                        {% else %}
+                            Todos
+                        {% endif %}
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item {% if not usuario_filtro %}active{% endif %}" href="{% url 'lista_cotizaciones' %}{% if status_filtro %}?status={{ status_filtro }}{% endif %}{% if agente_filtro %}{% if status_filtro %}&{% else %}?{% endif %}agente={{ agente_filtro }}{% endif %}">Todos</a></li>
+                        <li><a class="dropdown-item {% if usuario_filtro == 'sin_usuario' %}active{% endif %}" href="{% url 'lista_cotizaciones' %}?usuario=sin_usuario{% if status_filtro %}&status={{ status_filtro }}{% endif %}{% if agente_filtro %}&agente={{ agente_filtro }}{% endif %}"><i class="bi bi-exclamation-triangle text-warning me-1"></i>Sin usuario asignado</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        {% for usuario in usuarios %}
+                        <li>
+                            <a class="dropdown-item {% if usuario.id|stringformat:'s' == usuario_filtro %}active{% endif %}"
+                               href="{% url 'lista_cotizaciones' %}?usuario={{ usuario.id }}{% if status_filtro %}&status={{ status_filtro }}{% endif %}{% if agente_filtro %}&agente={{ agente_filtro }}{% endif %}">
+                                {{ usuario.username }}
                             </a>
                         </li>
                         {% endfor %}

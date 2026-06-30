@@ -33,7 +33,6 @@
                     <th>Tipo</th>
                     <th>Nombre</th>
                     <th>Puesto</th>
-                    <th>RFC</th>
                     <th>Teléfono</th>
                     <th>Email</th>
                     <th>Acciones</th>
@@ -51,7 +50,6 @@
                     </td>
                     <td>{{ contacto.nombre }}</td>
                     <td>{{ contacto.puesto }}</td>
-                    <td>{{ contacto.rfc|default:"—" }}</td>
                     <td>{{ contacto.telefono }}</td>
                     <td>{{ contacto.email }}</td>
                     <td>
@@ -89,10 +87,6 @@
                             <div class="col-md-6">
                                 <label class="form-label">Tipo</label>
                                 {{ form.tipo }}
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">RFC</label>
-                                {{ form.rfc }}
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Nombre</label>

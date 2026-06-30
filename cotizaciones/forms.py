@@ -1,12 +1,14 @@
 from django import forms
 from .models import Cotizacion
+from core.widgets import ClienteSelect
+
 
 class CotizacionForm(forms.ModelForm):
     class Meta:
         model = Cotizacion
         fields = ['rfc', 'contacto', 'agente', 'cuenta', 'solicitud', 'status', 'iva', 'moneda', 'forma_pago', 'vigencia', 'tiempo_entrega', 'lugar_entrega', 'notas']
         widgets = {
-            'rfc': forms.Select(attrs={'class': 'form-select'}),
+            'rfc': ClienteSelect(attrs={'class': 'form-select'}),
             'contacto': forms.Select(attrs={'class': 'form-select'}),
             'agente': forms.Select(attrs={'class': 'form-select'}),
             'solicitud': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Texto libre...'}),

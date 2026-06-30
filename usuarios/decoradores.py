@@ -1,5 +1,6 @@
 from functools import wraps
 from django.shortcuts import redirect
+from .permisos import usuario_tiene_permiso
 
 def permiso_requerido(permiso):
     """
@@ -19,7 +20,8 @@ def permiso_requerido(permiso):
             if request.user.is_superuser or request.user.is_staff:
                 return view_func(request, *args, **kwargs)
 
-            # Verificar que el usuario tiene perfil y rol asignado
+            # Verificar que el usuario tiene perfil y rol asignado (para distinguir
+            # 'sin perfil' de 'permiso negado' y dar el redirect correcto)
             try:
                 perfil = request.user.perfilusuario
                 rol = perfil.rol
@@ -32,8 +34,8 @@ def permiso_requerido(permiso):
             if rol is None:
                 return redirect('dashboard')
 
-            # Verificar el permiso específico
-            if not getattr(rol, permiso, False):
+            # Verificar el permiso específico (misma lógica que usuario_tiene_permiso)
+            if not usuario_tiene_permiso(request.user, permiso):
                 return redirect('sin_acceso')
 
             return view_func(request, *args, **kwargs)

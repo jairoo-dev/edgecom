@@ -11,5 +11,6 @@ urlpatterns = [
     path('api/cliente/<str:rfc>/', views.api_cliente, name='api_cliente'),
     path('api/agente/<int:pk>/', views.api_agente, name='api_agente'),
     path('detalle/<str:folio>/', views.detalle_cotizacion, name='detalle_cotizacion'),
+    path('buscar/', views.buscar_cotizaciones, name='buscar_cotizaciones'),
     path('pdf/<str:folio>/', views.generar_pdf, name='generar_pdf'),
 ]

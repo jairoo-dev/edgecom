@@ -1,0 +1,116 @@
+{% extends 'core/base.html' %}
+{% load humanize %}
+
+{% block title %}Buscar Cotizaciones{% endblock %}
+
+{% block content %}
+<div class="card shadow p-4">
+    <h4 class="mb-4"><i class="bi bi-search me-2"></i>Buscar Cotizaciones por RFC</h4>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="input-group mb-4" style="max-width: 500px;">
+            <input type="text" name="rfc" value="{{ rfc }}"
+                   class="form-control" placeholder="Ingresa el RFC del cliente...">
+            <button type="submit" class="btn btn-primary">Buscar</button>
+            {% if rfc %}
+            <a href="{% url 'buscar_cotizaciones' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-x"></i>
+            </a>
+            {% endif %}
+        </div>
+    </form>
+
+    {% if rfc and cliente %}
+    <div class="alert alert-light border mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <small class="text-muted text-uppercase">RFC</small><br>
+                <strong>{{ cliente.rfc }}</strong>
+            </div>
+            <div class="col-md-4">
+                <small class="text-muted text-uppercase">Razón Social</small><br>
+                <strong>{{ cliente.razon_social }}</strong>
+            </div>
+            <div class="col-md-4">
+                <small class="text-muted text-uppercase">Código Postal</small><br>
+                <strong>{{ cliente.codigo_postal }}</strong>
+            </div>
+        </div>
+    </div>
+    {% elif rfc and not cliente %}
+    <div class="alert alert-warning mb-4">
+        <i class="bi bi-exclamation-triangle me-2"></i>No se encontró un cliente con el RFC <strong>{{ rfc }}</strong>.
+    </div>
+    {% endif %}
+
+    {% if cotizaciones %}
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Folio</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Agente</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cotizacion in cotizaciones %}
+            <tr>
+                <td>
+                    <a href="{% url 'detalle_cotizacion' cotizacion.folio %}" class="fw-bold text-decoration-none">
+                        {{ cotizacion.folio }}
+                    </a>
+                </td>
+                <td>{{ cotizacion.fecha|default:"—" }}</td>
+                <td>${{ cotizacion.total|floatformat:2|intcomma }}</td>
+                <td>
+                    {% if cotizacion.status == 'ENVIADO' %}
+                        <span class="badge bg-info text-dark">Enviado</span>
+                    {% elif cotizacion.status == 'NEGOCIACION' %}
+                        <span class="badge bg-warning text-dark">Negociación</span>
+                    {% elif cotizacion.status == 'PERDIDO' %}
+                        <span class="badge bg-danger">Perdido</span>
+                    {% elif cotizacion.status == 'FACTURADO' %}
+                        <span class="badge bg-success">Facturado</span>
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td>{{ cotizacion.agente.nombre|default:"—" }}</td>
+                <td>
+                    <a href="{% url 'detalle_cotizacion' cotizacion.folio %}" class="btn btn-info btn-sm">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                    <a href="{% url 'generar_pdf' cotizacion.folio %}" class="btn btn-secondary btn-sm" target="_blank">
+                        <i class="bi bi-file-pdf"></i>
+                    </a>
+                    <a href="{% url 'editar_cotizacion' cotizacion.folio %}" class="btn btn-warning btn-sm">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <a href="{% url 'eliminar_cotizacion' cotizacion.folio %}" class="btn btn-danger btn-sm">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot class="table-light">
+            <tr>
+                <td colspan="2" class="text-end fw-bold">Total general:</td>
+                <td class="fw-bold text-primary">${{ total_general|floatformat:2|intcomma }}</td>
+                <td colspan="3"></td>
+            </tr>
+        </tfoot>
+    </table>
+    {% elif rfc %}
+    <p class="text-muted text-center py-4">No se encontraron cotizaciones para el RFC <strong>{{ rfc }}</strong>.</p>
+    {% endif %}
+
+    <a href="{% url 'lista_cotizaciones' %}" class="btn btn-secondary mt-2">
+        <i class="bi bi-arrow-left me-1"></i>Volver a Cotizaciones
+    </a>
+</div>
+{% endblock %}

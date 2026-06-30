@@ -5,12 +5,14 @@ from .forms import ClienteForm
 from .models import Cliente, DocumentoCliente
 
 @login_required(login_url='login')
+@permiso_requerido('puede_ver_clientes')
 def lista_clientes(request):
-    clientes = Cliente.objects.all()
+    clientes = Cliente.objects.all().order_by('-fecha_creacion')
     form = ClienteForm()
     return render(request, 'clientes/lista_clientes.html', {'clientes': clientes, 'form': form})
 
 @login_required(login_url='login')
+@permiso_requerido('puede_ver_clientes')
 def agregar_cliente(request):
     if request.method == 'POST':
         form = ClienteForm(request.POST)
@@ -18,7 +20,7 @@ def agregar_cliente(request):
             form.save()
             return redirect('lista_clientes')
         else:
-            clientes = Cliente.objects.all()
+            clientes = Cliente.objects.all().order_by('-fecha_creacion')
             return render(request, 'clientes/lista_clientes.html', {
                 'clientes': clientes,
                 'form': form,

@@ -1,16 +1,19 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
 from .models import Rol, PerfilUsuario
 from .forms import RolForm, UsuarioForm
 
 @login_required(login_url='login')
+@staff_member_required(login_url='sin_acceso')
 def lista_usuarios(request):
     usuarios = PerfilUsuario.objects.select_related('user', 'rol').all()
     form = UsuarioForm()
     return render(request, 'usuarios/lista_usuarios.html', {'usuarios': usuarios, 'form': form})
 
 @login_required(login_url='login')
+@staff_member_required(login_url='sin_acceso')
 def agregar_usuario(request):
     if request.method == 'POST':
         form = UsuarioForm(request.POST)
@@ -29,6 +32,7 @@ def agregar_usuario(request):
     return redirect('lista_usuarios')
 
 @login_required(login_url='login')
+@staff_member_required(login_url='sin_acceso')
 def editar_usuario(request, pk):
     perfil = get_object_or_404(PerfilUsuario, pk=pk)
     if request.method == 'POST':
@@ -51,6 +55,7 @@ def editar_usuario(request, pk):
     return render(request, 'usuarios/editar_usuario.html', {'form': form, 'perfil': perfil})
 
 @login_required(login_url='login')
+@staff_member_required(login_url='sin_acceso')
 def eliminar_usuario(request, pk):
     perfil = get_object_or_404(PerfilUsuario, pk=pk)
     if request.method == 'POST':
@@ -59,12 +64,14 @@ def eliminar_usuario(request, pk):
     return render(request, 'usuarios/eliminar_usuario.html', {'perfil': perfil})
 
 @login_required(login_url='login')
+@staff_member_required(login_url='sin_acceso')
 def lista_roles(request):
     roles = Rol.objects.all()
     form = RolForm()
     return render(request, 'usuarios/lista_roles.html', {'roles': roles, 'form': form})
 
 @login_required(login_url='login')
+@staff_member_required(login_url='sin_acceso')
 def agregar_rol(request):
     if request.method == 'POST':
         form = RolForm(request.POST)
@@ -74,6 +81,7 @@ def agregar_rol(request):
     return redirect('lista_roles')
 
 @login_required(login_url='login')
+@staff_member_required(login_url='sin_acceso')
 def editar_rol(request, pk):
     rol = get_object_or_404(Rol, pk=pk)
     if request.method == 'POST':
@@ -86,6 +94,7 @@ def editar_rol(request, pk):
     return render(request, 'usuarios/editar_rol.html', {'form': form, 'rol': rol})
 
 @login_required(login_url='login')
+@staff_member_required(login_url='sin_acceso')
 def eliminar_rol(request, pk):
     rol = get_object_or_404(Rol, pk=pk)
     if request.method == 'POST':

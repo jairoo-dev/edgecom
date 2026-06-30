@@ -1,5 +1,6 @@
 from django import forms
 from .models import Factura
+from core.widgets import ClienteSelect
 
 class FacturaForm(forms.ModelForm):
     class Meta:
@@ -7,7 +8,7 @@ class FacturaForm(forms.ModelForm):
         fields = ['folio', 'rfc', 'agente', 'total', 'status', 'monto_abono', 'fecha_pago', 'fecha_vencimiento', 'notas']
         widgets = {
             'folio':            forms.TextInput(attrs={'class': 'form-control'}),
-            'rfc':              forms.Select(attrs={'class': 'form-select'}),
+            'rfc':              ClienteSelect(attrs={'class': 'form-select'}),
             'agente':           forms.Select(attrs={'class': 'form-select'}),
             'total':            forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0.00'}),
             'status':           forms.Select(attrs={'class': 'form-select'}),

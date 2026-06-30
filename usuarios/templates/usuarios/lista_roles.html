@@ -41,6 +41,8 @@
                             {% if rol.puede_ver_directorio %}<span class="badge bg-success">Directorio</span>{% else %}<span class="badge bg-secondary">Directorio</span>{% endif %}
                             {% if rol.puede_ver_agentes %}<span class="badge bg-success">Agentes</span>{% else %}<span class="badge bg-secondary">Agentes</span>{% endif %}
                             {% if rol.puede_ver_cuentas %}<span class="badge bg-success">Cuentas</span>{% else %}<span class="badge bg-secondary">Cuentas</span>{% endif %}
+                            {% if rol.puede_ver_compras %}<span class="badge bg-success">Compras</span>{% else %}<span class="badge bg-secondary">Compras</span>{% endif %}
+                            {% if rol.puede_ver_proveedores %}<span class="badge bg-success">Proveedores</span>{% else %}<span class="badge bg-secondary">Proveedores</span>{% endif %}
                         </div>
                     </td>
                     <td>{% if rol.puede_editar %}<i class="bi bi-check-circle text-success"></i>{% else %}<i class="bi bi-x-circle text-danger"></i>{% endif %}</td>
@@ -129,6 +131,18 @@
                                         <div class="form-check">
                                             {{ form.puede_ver_cuentas }}
                                             <label class="form-check-label">Cuentas Bancarias</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            {{ form.puede_ver_compras }}
+                                            <label class="form-check-label">Compras</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            {{ form.puede_ver_proveedores }}
+                                            <label class="form-check-label">Proveedores</label>
                                         </div>
                                     </div>
                                 </div>
