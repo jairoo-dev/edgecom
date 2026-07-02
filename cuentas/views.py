@@ -5,7 +5,7 @@ from .models import CuentaBancaria
 
 @login_required(login_url='login')
 def lista_cuentas(request):
-    cuentas = CuentaBancaria.objects.all()
+    cuentas = CuentaBancaria.objects.all().order_by('-fecha_creacion')
     form = CuentaBancariaForm()
     return render(request, 'cuentas/lista_cuentas.html', {'cuentas': cuentas, 'form': form})
 
@@ -19,7 +19,7 @@ def agregar_cuenta(request):
             form.save()
             return redirect('lista_cuentas')
         else:
-            cuentas = CuentaBancaria.objects.all()
+            cuentas = CuentaBancaria.objects.all().order_by('-fecha_creacion')
             return render(request, 'cuentas/lista_cuentas.html', {
                 'cuentas': cuentas,
                 'form': form,

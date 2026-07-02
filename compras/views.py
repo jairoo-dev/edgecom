@@ -18,7 +18,7 @@ from usuarios.decoradores import permiso_requerido
 @permiso_requerido('puede_ver_compras')
 def lista_compras(request):
     status_filtro = request.GET.get('status', '')
-    compras = Compra.objects.select_related('proveedor').all()
+    compras = Compra.objects.select_related('proveedor').all().order_by('-fecha_creacion')
     if status_filtro:
         compras = compras.filter(status=status_filtro)
     form = CompraForm()
@@ -84,7 +84,7 @@ def buscar_compras(request):
 @login_required(login_url='login')
 @permiso_requerido('puede_ver_compras')
 def lista_ordenes(request):
-    ordenes = OrdenCompra.objects.select_related('proveedor', 'usuario_solicita', 'autorizado_por').all()
+    ordenes = OrdenCompra.objects.select_related('proveedor', 'usuario_solicita', 'autorizado_por').all().order_by('-fecha_creacion')
     form = OrdenCompraForm()
     productos = Producto.objects.all()
     return render(request, 'compras/lista_ordenes.html', {

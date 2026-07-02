@@ -26,7 +26,7 @@ def lista_cotizaciones(request):
     usuario_filtro = request.GET.get('usuario', '')
 
     if request.user.is_superuser or request.user.is_staff:
-        cotizaciones = Cotizacion.objects.all()
+        cotizaciones = Cotizacion.objects.all().order_by('-fecha_creacion')
         if agente_filtro:
             cotizaciones = cotizaciones.filter(agente__id=agente_filtro)
         if usuario_filtro == 'sin_usuario':
@@ -34,7 +34,7 @@ def lista_cotizaciones(request):
         elif usuario_filtro:
             cotizaciones = cotizaciones.filter(creado_por__id=usuario_filtro)
     else:
-        cotizaciones = Cotizacion.objects.filter(creado_por=request.user)
+        cotizaciones = Cotizacion.objects.filter(creado_por=request.user).order_by('-fecha_creacion')
 
     if status_filtro:
         cotizaciones = cotizaciones.filter(status=status_filtro)

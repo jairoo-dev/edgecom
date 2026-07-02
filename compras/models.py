@@ -31,6 +31,7 @@ class Compra(models.Model):
     forma_pago = models.CharField(max_length=15, choices=FORMA_PAGO_CHOICES, null=True, blank=True)
     notas = models.TextField(blank=True, null=True)
     creado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='compras')
+    fecha_creacion = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
         return self.folio
@@ -81,6 +82,7 @@ class OrdenCompra(models.Model):
     autorizado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='ordenes_autorizadas')
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     notas = models.TextField(blank=True, null=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
         return self.folio_orden

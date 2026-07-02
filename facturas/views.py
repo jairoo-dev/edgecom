@@ -21,13 +21,13 @@ def lista_facturas(request):
     usuario_filtro = request.GET.get('usuario', '')
 
     if request.user.is_superuser or request.user.is_staff:
-        facturas = Factura.objects.all()
+        facturas = Factura.objects.all().order_by('-fecha_creacion')
         if usuario_filtro == 'sin_usuario':
             facturas = facturas.filter(creado_por__isnull=True)
         elif usuario_filtro:
             facturas = facturas.filter(creado_por__id=usuario_filtro)
     else:
-        facturas = Factura.objects.filter(creado_por=request.user)
+        facturas = Factura.objects.filter(creado_por=request.user).order_by('-fecha_creacion')
 
     if status_filtro:
         facturas = facturas.filter(status=status_filtro)

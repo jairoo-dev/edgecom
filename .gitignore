@@ -7,3 +7,6 @@ media/
 *.sqlite3
 .DS_Store
 *.pycache__
+
+# Docker
+.dockerignore
