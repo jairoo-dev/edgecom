@@ -81,6 +81,7 @@ class Cotizacion(models.Model):
     cuenta = models.ForeignKey('cuentas.CuentaBancaria', on_delete=models.SET_NULL, null=True, blank=True)
     notas = models.TextField(blank=True, null=True)
     creado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='cotizaciones')
+    fecha_creacion = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
         return self.folio
