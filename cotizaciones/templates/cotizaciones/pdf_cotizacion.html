@@ -6,7 +6,7 @@
         @page {
             size: letter;
             margin-top: 4.5cm;
-            margin-bottom: 4cm;
+            margin-bottom: 5cm;
             margin-left: 1.5cm;
             margin-right: 1.5cm;
 
@@ -18,7 +18,7 @@
                 content: element(footer);
                 width: 100%;
                 vertical-align: top;
-                padding-top: 0.5cm;
+                padding-top: 0.2cm;
             }
         }
         * {
@@ -64,6 +64,7 @@
             width: 100%;
             border-top: 1px solid #ccc;
             padding-top: 15px;
+            padding-bottom: 15px;
             font-size: 8px;
             line-height: 1.6;
             color: #666;
@@ -220,9 +221,9 @@
         .agente-firma {
             display: flex;
             justify-content: space-between;
-            margin-top: 30px;
+            margin-top: 10px;
             border-top: 1px solid #ccc;
-            padding-top: 15px;
+            padding-top: 8px;
             break-inside: avoid;
             page-break-inside: avoid;
         }
@@ -234,7 +235,8 @@
         .agente-info h4 {
             font-size: 10px;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-top: 0;
+            margin-bottom: 2px;
             text-transform: uppercase;
             color: {{ empresa.color_primario|default:"#1a5276" }};
         }
@@ -248,8 +250,8 @@
         }
         .firma-linea {
             border-top: 1px solid #333;
-            margin-top: 5px;
-            padding-top: 3px;
+            margin-top: 60px;
+            padding-top: 5px;
             font-size: 9px;
             color: #222;
         }
@@ -263,11 +265,6 @@
             <img src="{{ logo_path }}" alt="{{ empresa.nombre|default:'EDGECOM' }}">
         </div>
         <div class="empresa-info">
-            <strong>{{ empresa.nombre|default:"EDGECOM" }}</strong><br>
-            {{ empresa.direccion|default:"Alvaro Artiñano, Edificio B, Planta Baja Local 2" }}<br>
-            {{ empresa.codigo_postal|default:"24158" }}<br>
-            {{ empresa.rfc|default:"EDG1602101K9" }}<br>
-            {{ empresa.regimen_fiscal|default:"Régimen General de Ley de Personas Morales" }}
         </div>
         <div class="contacto-info">
             Whatsapp Business {{ empresa.whatsapp|default:"938 385 1511" }}<br>
@@ -310,7 +307,7 @@
     <div class="seccion-folio-cliente">
         <div class="folio-fecha">
             <span class="label-primary">Folio</span> <span>{{ cotizacion.folio }}</span><br>
-            <span class="label-primary">Fecha</span> <span>{{ cotizacion.fecha }}</span><br>
+            <span class="label-primary">Fecha</span> <span>{{ cotizacion.fecha|date:"d/m/Y" }}</span><br>
             {% if cotizacion.solicitud %}
             <span class="label-primary">Solicitud</span> <span>{{ cotizacion.solicitud }}</span>
             {% endif %}
@@ -414,17 +411,14 @@
     <div class="agente-firma">
         <div class="agente-info">
             <h4>Agente de Ventas</h4>
-            <p>{{ cotizacion.agente.nombre }}</p>
-            <p>{{ cotizacion.agente.telefono }}</p>
-            <p>{{ cotizacion.agente.email }}</p>
+            <p style="margin:0; line-height:1.4;">{{ cotizacion.agente.nombre }}<br>{{ cotizacion.agente.telefono }}<br>{{ cotizacion.agente.email }}</p>
         </div>
         <div class="firma-box">
             {% if cotizacion.agente.firma %}
             <img src="{{ firma_path }}">
             {% endif %}
             <div class="firma-linea">
-                Nombre: {{ cotizacion.agente.nombre }}<br>
-                RFC: {{ empresa.rfc|default:"EDG1602101K9" }}
+                Nombre: {{ cotizacion.agente.nombre }}
             </div>
         </div>
     </div>
