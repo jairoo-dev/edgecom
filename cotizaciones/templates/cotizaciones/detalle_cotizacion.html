@@ -164,11 +164,16 @@
     </div>
 </div>
 
-{% if cotizacion.notas %}
+<!-- Sección de Notas -->
 <div class="card shadow-sm p-4 mb-4">
     <h5 class="fw-bold mb-3">Notas</h5>
-    <p>{{ cotizacion.notas }}</p>
+    <p class="mb-0 text-secondary">{{ cotizacion.notas|default:"—" }}</p>
 </div>
-{% endif %}
+
+<!-- Sección de Observaciones -->
+<div class="card shadow-sm p-4 mb-4">
+    <h5 class="fw-bold mb-3">Observaciones</h5>
+    <p class="mb-0 text-secondary">{{ cotizacion.observaciones|default:"—" }}</p>
+</div>
 
 {% endblock %}

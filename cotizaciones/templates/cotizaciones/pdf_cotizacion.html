@@ -1,3 +1,4 @@
+{% load edgecom_filters %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -38,10 +39,10 @@
             width: 100%;
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: center;
             padding-bottom: 20px;
             margin-left: -0.3cm;
-        }
+}
         .logo img {
             height: 60px;
         }
@@ -86,13 +87,13 @@
         /* CONTENIDO */
         .titulo {
             text-align: center;
-            font-size: 16px;
+            font-size: 30px;
             font-weight: bold;
             letter-spacing: 3px;
-            margin: 25px 0;
-            padding: 8px 0;
+            margin: 0;
+            padding: 0;
             color: {{ empresa.color_primario|default:"#1a5276" }};
-        }
+}
         .seccion-folio-cliente {
             display: flex;
             justify-content: space-between;
@@ -264,12 +265,7 @@
         <div class="logo">
             <img src="{{ logo_path }}" alt="{{ empresa.nombre|default:'EDGECOM' }}">
         </div>
-        <div class="empresa-info">
-        </div>
-        <div class="contacto-info">
-            Whatsapp Business {{ empresa.whatsapp|default:"938 385 1511" }}<br>
-            {{ empresa.sitio_web|default:"www.edgecom.mx" }}<br>
-            Teléfono +52 {{ empresa.telefono|default:"938 384 1304" }}
+        <div class="titulo">COTIZACIÓN
         </div>
     </div>
 
@@ -295,14 +291,13 @@
                 {{ empresa.rfc|default:"EDG1602101K9" }}<br>
                 {{ empresa.regimen_fiscal|default:"Régimen General de Ley de Personas Morales" }}<br>
                 {{ empresa.direccion|default:"Alvaro Artiñano Aguilar, Edificio B, Planta Baja, Local 2" }}<br>
-                Código Postal {{ empresa.codigo_postal|default:"24158" }}
+                Código Postal {{ empresa.codigo_postal|default:"24158" }}<br>
+                Whatsapp Business {{ empresa.whatsapp|default:"938 385 1511" }}<br>
+                Teléfono +52 {{ empresa.telefono|default:"938 384 1304" }}
             </div>
         </div>
     </div>
-
-    <!-- TÍTULO -->
-    <div class="titulo">COTIZACION</div>
-
+    
     <!-- FOLIO, FECHA Y CLIENTE -->
     <div class="seccion-folio-cliente">
         <div class="folio-fecha">
@@ -357,9 +352,10 @@
                     </div>
                 </td>
                 <td>{{ detalle.descripcion }}</td>
-                <td>{{ detalle.cantidad|floatformat:2 }}</td>
-                <td>${{ detalle.precio_unitario|floatformat:2 }}</td>
-                <td>${{ detalle.subtotal|floatformat:2 }}</td>
+                <!-- AQUÍ SE APLICÓ EL CAMBIO PARA CANTIDAD, PRECIO Y SUBTOTAL -->
+                <td>{{ detalle.cantidad|moneda }}</td>
+                <td>${{ detalle.precio_unitario|moneda }}</td>
+                <td>${{ detalle.subtotal|moneda }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -384,23 +380,24 @@
             {% if cotizacion.lugar_entrega %}
             <p><span class="label">Lugar de Entrega:</span> {{ cotizacion.lugar_entrega }}</p>
             {% endif %}
-            {% if cotizacion.notas %}
+            {% if cotizacion.notes %}
             <p><span class="label">Notas:</span> {{ cotizacion.notas }}</p>
             {% endif %}
         </div>
         <div class="totales">
             <table class="totales-tabla">
+                <!-- AQUÍ SE APLICÓ EL CAMBIO PARA BASE, IVA Y TOTAL -->
                 <tr>
                     <td class="label-total">BASE</td>
-                    <td style="text-align:right;">${{ base|floatformat:2 }}</td>
+                    <td style="text-align:right;">${{ base|moneda }}</td>
                 </tr>
                 <tr>
                     <td class="label-total">IVA {{ cotizacion.iva }}%</td>
-                    <td style="text-align:right;">${{ monto_iva|floatformat:2 }}</td>
+                    <td style="text-align:right;">${{ monto_iva|moneda }}</td>
                 </tr>
                 <tr class="total-final">
                     <td>TOTAL</td>
-                    <td style="text-align:right;">${{ cotizacion.total|floatformat:2 }}</td>
+                    <td style="text-align:right;">${{ cotizacion.total|moneda }}</td>
                 </tr>
             </table>
         </div>

@@ -82,6 +82,7 @@ class Cotizacion(models.Model):
     notas = models.TextField(blank=True, null=True)
     creado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='cotizaciones')
     fecha_creacion = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    observaciones = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.folio
