@@ -127,6 +127,12 @@
                     <td>{{ cotizacion.get_status_display|default:"—" }}</td>
                     <td>{{ cotizacion.fecha|date:"d/m/Y" }}</td>
                     <td>
+                        <!-- Botón de acceso rápido para el PDF -->
+                        <a href="{% url 'generar_pdf' cotizacion.folio %}" class="btn btn-success btn-sm me-1">
+                            <i class="bi bi-file-earmark-pdf"></i> PDF
+                        </a>
+    
+                        <!-- Tus botones actuales -->
                         <a href="{% url 'editar_cotizacion' cotizacion.folio %}" class="btn btn-warning btn-sm">Editar</a>
                         <a href="{% url 'eliminar_cotizacion' cotizacion.folio %}" class="btn btn-danger btn-sm">Eliminar</a>
                     </td>

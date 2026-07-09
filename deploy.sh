@@ -64,11 +64,11 @@ docker compose exec web python manage.py migrate
 # 6. Crear superusuario si no existe
 docker compose exec web python manage.py shell -c "
 from django.contrib.auth.models import User
-if not User.objects.filter(username='admin').exists():
-    User.objects.create_superuser('admin', 'admin@edgecom.mx', 'Admin123!')
-    print('Superusuario admin creado.')
+if not User.objects.filter(username='edge').exists():
+    User.objects.create_superuser('edge', 'edge@edgecom.mx', 'Edge123!')
+    print('Superusuario edge creado.')
 else:
-    print('El superusuario admin ya existe.')
+    print('El superusuario edge ya existe.')
 "
 
 echo ""

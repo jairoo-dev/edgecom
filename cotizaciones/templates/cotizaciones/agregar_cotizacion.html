@@ -332,6 +332,13 @@ function guardarProductoRapido() {
             document.querySelectorAll('.sku-select').forEach(s => s.add(new Option(res.sku, res.sku)));
             bootstrap.Modal.getInstance(document.getElementById('modalNuevoProducto')).hide();
             document.getElementById('mensaje-producto').innerHTML = '';
+
+            //  NUEVO: Limpia los campos del modal de producto para la próxima vez
+            document.getElementById('nuevo_sku').value = '';
+            document.getElementById('nuevo_clave_sat').value = '';
+            document.getElementById('nuevo_descripcion').value = '';
+            document.getElementById('nuevo_unidad_sat').value = '';
+            document.getElementById('nuevo_precio').value = '';
         } else {
             document.getElementById('mensaje-producto').innerHTML = '<div class="alert alert-danger py-1">Error al guardar.</div>';
         }
@@ -356,6 +363,13 @@ function guardarServicioRapido() {
             document.querySelectorAll('.sku-select').forEach(s => s.add(new Option(res.sku, res.sku)));
             bootstrap.Modal.getInstance(document.getElementById('modalNuevoServicio')).hide();
             document.getElementById('mensaje-servicio').innerHTML = '';
+
+            //  NUEVO: Limpia los campos del modal de servicio para la próxima vez
+            document.getElementById('nuevo_sku_serv').value = '';
+            document.getElementById('nuevo_clave_sat_serv').value = '';
+            document.getElementById('nuevo_descripcion_serv').value = '';
+            document.getElementById('nuevo_unidad_sat_serv').value = '';
+            document.getElementById('nuevo_precio_serv').value = '';
         } else {
             document.getElementById('mensaje-servicio').innerHTML = '<div class="alert alert-danger py-1">Error al guardar.</div>';
         }
