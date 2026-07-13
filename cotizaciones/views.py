@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
+from django.utils import timezone
 from decimal import Decimal
 import os
 from django.conf import settings
@@ -42,6 +43,25 @@ def lista_cotizaciones(request):
     agentes = Agente.objects.all()
     usuarios = User.objects.all().order_by('username') if (request.user.is_superuser or request.user.is_staff) else None
     form = CotizacionForm()
+    hoy = timezone.localdate()
+    meses_es = {
+        1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril',
+        5: 'Mayo', 6: 'Junio', 7: 'Julio', 8: 'Agosto',
+        9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
+    }
+    mes_actual = f"{meses_es[hoy.month]} {hoy.year}"
+
+    # Cálculos dinámicos basados en tu lista de cotizaciones filtered
+    total_cotizado = sum(c.total for c in cotizaciones)
+
+    # Filtramos las pendientes (cambia 'PENDIENTE' por cómo lo tengas guardado en tus choices)
+    total_pendiente = sum(c.total for c in cotizaciones if c.status == 'PENDIENTE')
+
+    # Total acumulado creado en el mes actual
+    total_mes = sum(
+        c.total for c in cotizaciones 
+        if c.fecha and c.fecha.year == hoy.year and c.fecha.month == hoy.month
+    )    
     return render(request, 'cotizaciones/lista_cotizaciones.html', {
         'cotizaciones': cotizaciones,
         'form': form,
@@ -50,6 +70,10 @@ def lista_cotizaciones(request):
         'agente_filtro': agente_filtro,
         'status_filtro': status_filtro,
         'usuario_filtro': usuario_filtro,
+        'total_cotizado': total_cotizado,
+        'total_pendiente': total_pendiente,
+        'total_mes': total_mes,
+        'mes_actual': mes_actual,
     })
 
 @login_required(login_url='login')

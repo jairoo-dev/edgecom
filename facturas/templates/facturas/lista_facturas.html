@@ -27,19 +27,19 @@
             <div class="col-md-4">
                 <div class="card border-0 bg-light p-3">
                     <p class="text-muted small text-uppercase mb-1">Total Facturado</p>
-                    <h4 class="fw-bold mb-0">${{ total_facturado|floatformat:2 }}</h4>
+                    <h4 class="fw-bold mb-0">${{ total_facturado|moneda }}</h4>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card border-0 bg-light p-3">
                     <p class="text-muted small text-uppercase mb-1">Saldo Pendiente</p>
-                    <h4 class="fw-bold mb-0 {% if saldo_pendiente > 0 %}text-danger{% else %}text-success{% endif %}">${{ saldo_pendiente|floatformat:2 }}</h4>
+                    <h4 class="fw-bold mb-0 {% if saldo_pendiente > 0 %}text-danger{% else %}text-success{% endif %}">${{ saldo_pendiente|moneda }}</h4>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card border-0 bg-light p-3">
                     <p class="text-muted small text-uppercase mb-1">Cobrado en {{ mes_actual }}</p>
-                    <h4 class="fw-bold mb-0 text-success">${{ total_mes|floatformat:2 }}</h4>
+                    <h4 class="fw-bold mb-0 text-success">${{ total_mes|moneda }}</h4>
                 </div>
             </div>
         </div>
