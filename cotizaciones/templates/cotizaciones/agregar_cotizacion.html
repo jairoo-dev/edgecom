@@ -254,6 +254,8 @@
 
 {% block scripts %}
 <script>
+
+let isRestoring = false; // Bandera para evitar que los fetch sobrescriban al restaurar
 const catalogoProductos = {
     {% for producto in productos %}
     "{{ producto.sku }}": { clave_sat: "{{ producto.clave_sat }}", unidad_sat: "{{ producto.unidad_sat }}", descripcion: "{{ producto.descripcion }}", precio_unitario: {{ producto.precio_unitario }} },
@@ -272,7 +274,18 @@ function agregarLinea() {
     const tbody = document.getElementById('cuerpo-conceptos');
     tbody.appendChild(clon);
     const fila = tbody.lastElementChild;
+    
     const $skuSelect = $(fila.querySelector('.sku-select'));
+    
+    // 1. Inicializar Select2 en el nuevo select con el tema de Bootstrap 5
+    $skuSelect.select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: 'Seleccionar...',
+        allowClear: true
+    });
+
+    // 2. Asociar eventos
     $skuSelect.on('change select2:select select2:unselect', function() { autocompletar(this); });
     fila.querySelector('.cantidad').addEventListener('input', calcularTotales);
     fila.querySelector('.precio').addEventListener('input', calcularTotales);
@@ -328,12 +341,38 @@ function guardarProductoRapido() {
         body: new URLSearchParams(data)
     }).then(r => r.json()).then(res => {
         if (res.success) {
-            catalogoProductos[res.sku] = { clave_sat: res.clave_sat, unidad_sat: res.unidad_sat, descripcion: res.descripcion, precio_unitario: parseFloat(res.precio_unitario) };
-            document.querySelectorAll('.sku-select').forEach(s => s.add(new Option(res.sku, res.sku)));
+            // 1. Guardar en memoria global
+            catalogoProductos[res.sku] = { 
+                clave_sat: res.clave_sat, 
+                unidad_sat: res.unidad_sat, 
+                descripcion: res.descripcion, 
+                precio_unitario: parseFloat(res.precio_unitario) 
+            };
+
+            // 2. Agregar a todos los Select2 existentes
+            $('.sku-select').each(function() {
+                const select = $(this);
+                if (select.find("option[value='" + res.sku + "']").length === 0) {
+                    const nuevaOpcion = new Option(res.sku, res.sku, false, false);
+                    select.append(nuevaOpcion);
+                }
+            });
+            $('.sku-select').trigger('change.select2');
+
+            // 3. NUEVO: Seleccionar automáticamente el producto en la ÚLTIMA fila activa de la tabla y autocompletar
+            const filas = document.querySelectorAll('#cuerpo-conceptos tr');
+            if (filas.length > 0) {
+                const ultimaFila = filas[filas.length - 1];
+                const selectUltimaFila = ultimaFila.querySelector('.sku-select');
+                if (selectUltimaFila) {
+                    $(selectUltimaFila).val(res.sku).trigger('change');
+                }
+            }
+
+            // 4. Cerrar modal y limpiar campos
             bootstrap.Modal.getInstance(document.getElementById('modalNuevoProducto')).hide();
             document.getElementById('mensaje-producto').innerHTML = '';
 
-            //  NUEVO: Limpia los campos del modal de producto para la próxima vez
             document.getElementById('nuevo_sku').value = '';
             document.getElementById('nuevo_clave_sat').value = '';
             document.getElementById('nuevo_descripcion').value = '';
@@ -359,12 +398,38 @@ function guardarServicioRapido() {
         body: new URLSearchParams(data)
     }).then(r => r.json()).then(res => {
         if (res.success) {
-            catalogoProductos[res.sku] = { clave_sat: res.clave_sat, unidad_sat: res.unidad_sat, descripcion: res.descripcion, precio_unitario: parseFloat(res.precio_unitario) };
-            document.querySelectorAll('.sku-select').forEach(s => s.add(new Option(res.sku, res.sku)));
+            // 1. Guardar en memoria global
+            catalogoProductos[res.sku] = { 
+                clave_sat: res.clave_sat, 
+                unidad_sat: res.unidad_sat, 
+                descripcion: res.descripcion, 
+                precio_unitario: parseFloat(res.precio_unitario) 
+            };
+
+            // 2. Agregar a todos los Select2 existentes
+            $('.sku-select').each(function() {
+                const select = $(this);
+                if (select.find("option[value='" + res.sku + "']").length === 0) {
+                    const nuevaOpcion = new Option(res.sku, res.sku, false, false);
+                    select.append(nuevaOpcion);
+                }
+            });
+            $('.sku-select').trigger('change.select2');
+
+            // 3. NUEVO: Seleccionar automáticamente el servicio en la ÚLTIMA fila activa de la tabla y autocompletar
+            const filas = document.querySelectorAll('#cuerpo-conceptos tr');
+            if (filas.length > 0) {
+                const ultimaFila = filas[filas.length - 1];
+                const selectUltimaFila = ultimaFila.querySelector('.sku-select');
+                if (selectUltimaFila) {
+                    $(selectUltimaFila).val(res.sku).trigger('change');
+                }
+            }
+
+            // 4. Cerrar modal y limpiar campos
             bootstrap.Modal.getInstance(document.getElementById('modalNuevoServicio')).hide();
             document.getElementById('mensaje-servicio').innerHTML = '';
 
-            //  NUEVO: Limpia los campos del modal de servicio para la próxima vez
             document.getElementById('nuevo_sku_serv').value = '';
             document.getElementById('nuevo_clave_sat_serv').value = '';
             document.getElementById('nuevo_descripcion_serv').value = '';
@@ -374,6 +439,109 @@ function guardarServicioRapido() {
             document.getElementById('mensaje-servicio').innerHTML = '<div class="alert alert-danger py-1">Error al guardar.</div>';
         }
     });
+}
+
+function guardarBorradorLocal() {
+    const formData = {
+        cliente: $('#id_rfc').val(),
+        razon_social: document.getElementById('razon_social').value,
+        codigo_postal: document.getElementById('codigo_postal').value,
+        contacto: $('#id_contacto').val(),
+        nombre_contacto: document.getElementById('nombre_contacto').value,
+        puesto_contacto: document.getElementById('puesto_contacto').value,
+        agente: $('#id_agente').val(),
+        solicitud: document.getElementById('id_solicitud') ? document.getElementById('id_solicitud').value : '',
+        status: $('#id_status').val(),
+        moneda: $('#id_moneda').val(),
+        iva: $('#id_iva').val(),
+        forma_pago: $('#id_forma_pago').val(),
+        vigencia: document.getElementById('id_vigencia') ? document.getElementById('id_vigencia').value : '',
+        tiempo_entrega: document.getElementById('id_tiempo_entrega') ? document.getElementById('id_tiempo_entrega').value : '',
+        lugar_entrega: document.getElementById('id_lugar_entrega') ? document.getElementById('id_lugar_entrega').value : '',
+        cuenta: $('#id_cuenta').val(),
+        notas: document.getElementById('id_notas') ? document.getElementById('id_notas').value : '',
+        observaciones: document.getElementById('id_observaciones') ? document.getElementById('id_observaciones').value : '',
+        conceptos: []
+    };
+
+    // Capturar las líneas de conceptos actuales
+    document.querySelectorAll('#cuerpo-conceptos tr').forEach(fila => {
+        const sku = $(fila.querySelector('.sku-select')).val();
+        const descripcion = fila.querySelector('[name="descripcion[]"]').value;
+        const cantidad = fila.querySelector('.cantidad').value;
+        const precio = fila.querySelector('.precio').value;
+        if (sku || descripcion) {
+            formData.conceptos.push({ sku, descripcion, cantidad, precio });
+        }
+    });
+
+    localStorage.setItem('borrador_cotizacion', JSON.stringify(formData));
+}
+
+function restaurarBorradorLocal() {
+    const savedData = localStorage.getItem('borrador_cotizacion');
+    if (!savedData) {
+        agregarLinea();
+        return;
+    }
+    
+    isRestoring = true; // Activamos la bandera para bloquear los fetch automáticos
+    const data = JSON.parse(savedData);
+
+    // Restaurar selects principales
+    if (data.cliente) { $('#id_rfc').val(data.cliente).trigger('change'); }
+    if (data.contacto) { $('#id_contacto').val(data.contacto).trigger('change'); }
+    if (data.agente) { $('#id_agente').val(data.agente).trigger('change'); }
+    
+    if (data.solicitud && document.getElementById('id_solicitud')) document.getElementById('id_solicitud').value = data.solicitud;
+    if (data.status) { $('#id_status').val(data.status).trigger('change'); }
+    if (data.moneda) { $('#id_moneda').val(data.moneda).trigger('change'); }
+    if (data.iva) { $('#id_iva').val(data.iva).trigger('change'); }
+    if (data.forma_pago) { $('#id_forma_pago').val(data.forma_pago).trigger('change'); }
+    if (data.vigencia && document.getElementById('id_vigencia')) document.getElementById('id_vigencia').value = data.vigencia;
+    if (data.tiempo_entrega && document.getElementById('id_tiempo_entrega')) document.getElementById('id_tiempo_entrega').value = data.tiempo_entrega;
+    if (data.lugar_entrega && document.getElementById('id_lugar_entrega')) document.getElementById('id_lugar_entrega').value = data.lugar_entrega;
+    if (data.cuenta) { $('#id_cuenta').val(data.cuenta).trigger('change'); }
+    if (data.notas && document.getElementById('id_notas')) document.getElementById('id_notas').value = data.notas;
+    if (data.observaciones && document.getElementById('id_observaciones')) document.getElementById('id_observaciones').value = data.observaciones;
+
+    // Restaurar directamente los campos de texto autocompletados sin que nadie los borre
+    if (data.razon_social) document.getElementById('razon_social').value = data.razon_social;
+    if (data.codigo_postal) document.getElementById('codigo_postal').value = data.codigo_postal;
+    if (data.nombre_contacto) document.getElementById('nombre_contacto').value = data.nombre_contacto;
+    if (data.puesto_contacto) document.getElementById('puesto_contacto').value = data.puesto_contacto;
+
+    // Restaurar conceptos de la tabla
+    if (data.conceptos && data.conceptos.length > 0) {
+        document.getElementById('cuerpo-conceptos').innerHTML = '';
+        
+        data.conceptos.forEach(item => {
+            agregarLinea();
+            const filas = document.querySelectorAll('#cuerpo-conceptos tr');
+            const ultimaFila = filas[filas.length - 1];
+            
+            if (item.sku) {
+                $(ultimaFila.querySelector('.sku-select')).val(item.sku).trigger('change');
+            }
+            if (item.descripcion) {
+                ultimaFila.querySelector('[name="descripcion[]"]').value = item.descripcion;
+            }
+            if (item.cantidad) {
+                ultimaFila.querySelector('.cantidad').value = item.cantidad;
+            }
+            if (item.precio) {
+                ultimaFila.querySelector('.precio').value = item.precio;
+            }
+        });
+        calcularTotales();
+    } else {
+        agregarLinea();
+    }
+
+    // Liberamos la bandera un momento después de terminar la restauración
+    setTimeout(() => {
+        isRestoring = false;
+    }, 500);
 }
 
 // Validación al guardar
@@ -400,11 +568,22 @@ document.getElementById('formCotizacion').addEventListener('submit', function(e)
     }
     const t = document.getElementById('total_calculado');
     if (!t.value || !t.value.trim()) t.value = '0';
+
+    // LIMPIAR BORRADOR AL GUARDAR EXITOSAMENTE
+    localStorage.removeItem('borrador_cotizacion');
 });
 
-document.getElementById('id_iva').addEventListener('change', calcularTotales);
+// Escuchar cambios en cualquier campo del formulario para actualizar el borrador local
+document.getElementById('formCotizacion').addEventListener('input', guardarBorradorLocal);
+document.getElementById('formCotizacion').addEventListener('change', guardarBorradorLocal);
+$(document).on('change', '.sku-select, #id_rfc, #id_contacto, #id_agente, #id_status, #id_moneda, #id_iva, #id_forma_pago, #id_cuenta', guardarBorradorLocal);
+
+$('#id_iva').on('select2:select select2:unselect change', calcularTotales);
 
 $('#id_rfc').on('select2:select', function(e) {
+    if (isRestoring) {
+        return; // Si estamos restaurando, no dispares el fetch
+    }
     fetch(`/cotizaciones/api/cliente/${e.params.data.id}/`)
         .then(r => r.json())
         .then(data => {
@@ -418,6 +597,9 @@ $('#id_rfc').on('select2:unselect', function() {
 });
 
 $('#id_contacto').on('select2:select', function(e) {
+    if (isRestoring) {
+        return; // Si estamos restaurando, no dispares el fetch
+    }
     fetch(`/cotizaciones/api/contacto/${e.params.data.id}/`)
         .then(r => r.json())
         .then(data => {
@@ -430,7 +612,7 @@ $('#id_contacto').on('select2:unselect', function() {
     document.getElementById('puesto_contacto').value = '';
 });
 
-agregarLinea();
+restaurarBorradorLocal();
 
 function matchClienteOMatch(params, data) {
     if (!params.term || params.term.trim() === '') {

@@ -9,4 +9,5 @@ urlpatterns = [
     path('buscar/', views.buscar_facturas, name='buscar_facturas'),
     path('estados-cuenta/', views.estados_cuenta, name='estados_cuenta'),
     path('estado-cuenta/<str:rfc>/', views.estado_cuenta_pdf, name='estado_cuenta_pdf'),
+    path('facturas/<str:folio>/timbrar/', views.timbrar_factura_view, name='timbrar_factura'),
 ]

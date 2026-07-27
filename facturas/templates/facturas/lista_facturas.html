@@ -5,6 +5,18 @@
 
 {% block content %}
     <div class="card shadow p-4">
+
+        {% if messages %}
+            <div class="alert-container mb-3">
+                {% for message in messages %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Facturas</h2>
             <div class="d-flex gap-2">
@@ -80,7 +92,7 @@
                         {% for usuario in usuarios %}
                         <li>
                             <a class="dropdown-item {% if usuario.id|stringformat:'s' == usuario_filtro %}active{% endif %}"
-                               href="{% url 'lista_facturas' %}?usuario={{ usuario.id }}{% if status_filtro %}&status={{ status_filtro }}{% endif %}">
+                                href="{% url 'lista_facturas' %}?usuario={{ usuario.id }}{% if status_filtro %}&status={{ status_filtro }}{% endif %}">
                                 {{ usuario.username }}
                             </a>
                         </li>
@@ -132,40 +144,129 @@
                         {% if factura.status == 'PAGADO' %}
                             <span class="badge bg-dark">Pagado</span>
                         {% elif factura.status == 'TIMBRADO' %}
-                            <span class="badge bg-dark">Timbrado</span>
+                            <span class="badge bg-success">Timbrado</span>
                         {% elif factura.status == 'CREDITO' %}
-                            <span class="badge bg-dark">Crédito</span>
+                            <span class="badge bg-info text-dark">Crédito</span>
                         {% elif factura.status == 'ADEUDO' %}
-                            <span class="badge bg-dark">Adeudo</span>
+                            <span class="badge bg-danger">Adeudo</span>
                         {% elif factura.status == 'ABONO' %}
-                            <span class="badge bg-dark">Abono</span>
+                            <span class="badge bg-warning text-dark">Abono</span>
                         {% endif %}
                     </td>
                     <td>
                         {% if factura.fecha_pago %}
-                            <span class="text-dark">{{ factura.fecha_pago }}</span>
+                            {{ factura.fecha_pago|date:"d \d\e F \d\e Y" }}
                         {% else %}
                             <span class="text-muted">—</span>
                         {% endif %}
                     </td>
                     <td>
                         {% if factura.fecha_vencimiento %}
-                            {{ factura.fecha_vencimiento }}
+                            {{ factura.fecha_vencimiento|date:"d \d\e F \d\e Y" }}
                         {% else %}
                             <span class="text-muted">—</span>
                         {% endif %}
                     </td>
                     <td>
-                        <a href="{% url 'editar_factura' factura.folio %}" class="btn btn-warning btn-sm">Editar</a>
-                        <a href="{% url 'eliminar_factura' factura.folio %}" class="btn btn-danger btn-sm">Eliminar</a>
+                        <div class="d-flex gap-1">
+                            {% if factura.status == 'TIMBRADO' %}
+                                {% if factura.xml_sat.name %}
+                                    <a href="{{ factura.xml_sat.url }}" download class="btn btn-sm btn-outline-secondary" title="Descargar XML">
+                                        <i class="bi bi-filetype-xml"></i> XML
+                                    </a>
+                                {% endif %}
+                                {% if factura.pdf_sat.name %}
+                                    <a href="{{ factura.pdf_sat.url }}" download class="btn btn-sm btn-outline-danger" title="Descargar PDF">
+                                        <i class="bi bi-file-pdf"></i> PDF
+                                    </a>
+                                {% endif %}
+                            {% else %}
+                                <a href="{% url 'editar_factura' factura.folio %}" class="btn btn-sm btn-warning">Editar</a>
+                                <a href="{% url 'eliminar_factura' factura.folio %}" class="btn btn-sm btn-danger">Eliminar</a>
+                                <button type="button" class="btn btn-sm btn-primary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalConfirmarTimbrado"
+                                    data-folio="{{ factura.folio }}"
+                                    data-rfc="{{ factura.rfc_id }}"
+                                    data-total="{{ factura.total }}"
+                                    data-url="{% url 'timbrar_factura' factura.folio %}">
+                                    Timbrar
+                                </button>
+                            {% endif %}
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="9" class="text-center text-muted py-4">No hay facturas registradas.</td>
+                    <td colspan="9" class="text-center text-muted">No se encontraron facturas registradas.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+
+    <!-- Modal Confirmar Timbrado -->
+    <div class="modal fade" id="modalConfirmarTimbrado" tabindex="-1" aria-labelledby="modalTimbradoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalTimbradoLabel">
+                        <i class="bi bi-file-earmark-check me-2"></i>Confirmar Timbrado
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">Estás a punto de timbrar la siguiente factura ante el SAT. <strong>Esta acción no se puede deshacer.</strong></p>
+                    <table class="table table-sm table-bordered">
+                        <tr>
+                            <th class="text-muted" style="width:40%">Folio</th>
+                            <td id="modal-folio" class="fw-bold"></td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">RFC Receptor</th>
+                            <td id="modal-rfc"></td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Total</th>
+                            <td id="modal-total" class="fw-bold text-success"></td>
+                        </tr>
+                    </table>
+                    <div class="alert alert-warning py-2 mb-0">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        Una vez timbrada, la factura no podrá editarse.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <a id="btn-confirmar-timbrado" href="#" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-1"></i>Sí, Timbrar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Auto-cerrar alertas después de 5 segundos
+    document.addEventListener("DOMContentLoaded", function() {
+        setTimeout(function() {
+            document.querySelectorAll('.alert').forEach(function(alert) {
+                let bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                if (bsAlert) bsAlert.close();
+            });
+        }, 5000);
+    });
+
+    // Llenar modal con datos de la factura seleccionada
+    document.getElementById('modalConfirmarTimbrado').addEventListener('show.bs.modal', function (e) {
+        const btn = e.relatedTarget;
+        document.getElementById('modal-folio').textContent = btn.getAttribute('data-folio');
+        document.getElementById('modal-rfc').textContent   = btn.getAttribute('data-rfc');
+        document.getElementById('modal-total').textContent = '$' + parseFloat(btn.getAttribute('data-total')).toLocaleString('es-MX', {minimumFractionDigits: 2});
+        document.getElementById('btn-confirmar-timbrado').href = btn.getAttribute('data-url');
+    });
+</script>
 {% endblock %}

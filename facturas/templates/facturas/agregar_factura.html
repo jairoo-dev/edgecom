@@ -8,55 +8,52 @@
     <a href="{% url 'lista_facturas' %}" class="btn btn-secondary"><i class="bi bi-arrow-left me-1"></i>Regresar</a>
 </div>
 
-<form method="post" id="formFactura">
+<form method="post" action="" id="formFactura" novalidate>
     {% csrf_token %}
-
-    {% if form.errors %}
-    <div class="alert alert-danger fw-bold">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        {% if form.folio.errors %}
-            ⚠ El folio <strong>{{ form.folio.value }}</strong> ya existe o no es válido.
-        {% else %}
-            Por favor corrige los errores antes de guardar.
-        {% endif %}
-    </div>
+    {% if form.errors or formset.errors %}
+        <div class="alert alert-danger mt-2">
+            <strong>Atención:</strong> El formulario no se pudo guardar por lo siguiente:
+            {{ form.errors }}
+            {{ formset.errors }}
+        </div>
     {% endif %}
+    <input type="hidden" name="total" id="total_calculado">
+    
+    {{ formset.management_form }}
 
     <div class="card shadow-sm p-4 mb-4">
         <h5 class="fw-bold mb-3">Información General</h5>
         <div class="row g-3">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label class="form-label">Folio</label>
                 {{ form.folio }}
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label class="form-label">Cliente</label>
                 {{ form.rfc }}
             </div>
-            <div class="col-md-6">
-                <label class="form-label">Agente</label>
-                {{ form.agente }}
-                {% if agente_usuario %}
-                    <small class="text-muted"><i class="bi bi-lock me-1"></i>Asignado a tu usuario</small>
-                {% endif %}
+            <div class="col-md-4">
+                <label class="form-label">Razón Social</label>
+                <input type="text" class="form-control" id="razon_social" readonly>
             </div>
-            <div class="col-md-6">
-                <label class="form-label">Total</label>
-                {{ form.total }}
+            <div class="col-md-4">
+                <label class="form-label">Código Postal</label>
+                <input type="text" class="form-control" id="codigo_postal" readonly>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label class="form-label">Status</label>
                 {{ form.status }}
             </div>
-            <div class="col-md-6" id="campo_abono" style="display:none;">
-                <label class="form-label">Monto Abonado</label>
+            
+            <div class="col-md-4" id="campo_abono" style="display: none;">
+                <label class="form-label">Monto de Abono</label>
                 {{ form.monto_abono }}
             </div>
-            <div class="col-md-6" id="campo_fecha_pago" style="display:none;">
+            <div class="col-md-4" id="campo_fecha_pago" style="display: none;">
                 <label class="form-label">Fecha de Pago / Abono</label>
                 {{ form.fecha_pago }}
             </div>
-            <div class="col-md-6" id="campo_vencimiento" style="display:none;">
+            <div class="col-md-4" id="campo_vencimiento" style="display: none;">
                 <label class="form-label">Fecha de Vencimiento</label>
                 {{ form.fecha_vencimiento }}
             </div>
@@ -64,7 +61,97 @@
     </div>
 
     <div class="card shadow-sm p-4 mb-4">
-        <h5 class="fw-bold mb-3">Notas</h5>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0">Conceptos</h5>
+            <button type="button" class="btn btn-primary btn-sm" onclick="agregarLinea()">
+                <i class="bi bi-plus me-1"></i>Agregar
+            </button>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover" id="tabla-conceptos">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 15%;">SKU</th>
+                        <th style="width: 12%;">Clave SAT</th>
+                        <th style="width: 10%;">Unidad SAT</th>
+                        <th style="width: 25%;">Descripción</th>
+                        <th style="width: 8%;">Cantidad</th>
+                        <th style="width: 12%;">Precio Unit.</th>
+                        <th style="width: 15%;">Subtotal</th>
+                        <th style="width: 3%;"></th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpo-conceptos">
+                    {% for detalle_form in formset %}
+                    <tr class="fila-producto">
+                        {{ detalle_form.id }}
+                        <td class="d-none">{{ detalle_form.DELETE }}</td>
+                        <td>{{ detalle_form.item_sku }}</td>
+                        <td><input type="text" class="form-control form-control-sm col-clave-sat" readonly style="min-width:100px;"></td>
+                        <td><input type="text" class="form-control form-control-sm col-unidad-sat" readonly style="min-width:100px;"></td>
+                        <td><input type="text" class="form-control form-control-sm col-descripcion" style="min-width:200px;" readonly></td>
+                        <td>{{ detalle_form.cantidad }}</td>
+                        <td>{{ detalle_form.precio_unitario }}</td>
+                        <td><input type="number" class="form-control form-control-sm subtotal" value="0" readonly style="min-width:100px;"></td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="eliminarLinea(this)"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="row justify-content-end mt-3">
+            <div class="col-md-4">
+                <table class="table table-sm">
+                    <tr>
+                        <td class="text-muted">Base:</td>
+                        <td class="text-end fw-bold" id="display-base">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">IVA:</td>
+                        <td class="text-end fw-bold" id="display-iva">$0.00</td>
+                    </tr>
+                    <tr class="table-dark">
+                        <td class="fw-bold">Total:</td>
+                        <td class="text-end fw-bold" id="display-total">$0.00</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm p-4 mb-4">
+        <h5 class="fw-bold mb-3">Condiciones de Facturación</h5>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Método de Pago</label>
+                {{ form.metodo_pago }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Forma de Pago</label>
+                {{ form.forma_pago }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Uso de CFDI</label>
+                {{ form.uso_cfdi }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">IVA (%)</label>
+                <select id="id_iva" class="form-select">
+                    <option value="16" selected>16%</option>
+                    <option value="8">8%</option>
+                    <option value="0">0%</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. NOTAS -->
+    <div class="card shadow-sm p-4 mb-4">
+        <h5 class="fw-bold mb-3">Notas Internas</h5>
         {{ form.notas }}
     </div>
 
@@ -74,54 +161,390 @@
     </div>
 </form>
 
+<template id="template-linea">
+    <tr class="linea-form">
+        <td class="d-none">
+            {{ formset.empty_form.DELETE }}
+        </td>
+        <td>
+            {{ formset.empty_form.item_sku }}
+        </td>
+        <td><input type="text" class="form-control form-control-sm col-clave-sat" readonly style="min-width:100px;"></td>
+        <td><input type="text" class="form-control form-control-sm col-unidad-sat" readonly style="min-width:100px;"></td>
+        <td><input type="text" class="form-control form-control-sm col-descripcion" style="min-width:200px;" readonly></td>
+        <td>
+            {{ formset.empty_form.cantidad }}
+        </td>
+        <td>
+            {{ formset.empty_form.precio_unitario }}
+        </td>
+        <td><input type="number" class="form-control form-control-sm subtotal" value="0" readonly style="min-width:100px;"></td>
+        <td>
+            <button type="button" class="btn btn-danger btn-sm" onclick="eliminarLinea(this)"><i class="bi bi-trash"></i></button>
+        </td>
+    </tr>
+</template>
+
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+    <div id="toastLineasVacias" class="toast align-items-center text-bg-danger border-0" role="alert" data-bs-delay="4000">
+        <div class="d-flex">
+            <div class="toast-body fs-6">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                Agrega un producto o elimina la línea.
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    $(document).ready(function () {
-        var $statusSelect = $('#id_status');
+let isRestoring = false; // Bandera para evitar que los fetch o eventos disparen cambios falsos al restaurar
 
-        // Quitar Select2 del select de status y dejarlo como select nativo con estilo Bootstrap
-        $statusSelect.select2('destroy');
-        $statusSelect.addClass('form-select');
+const catalogoProductos = {
+    {% for producto in productos %}
+    "{{ producto.sku }}": { 
+        clave_sat: "{{ producto.clave_sat }}", 
+        unidad_sat: "{{ producto.unidad_sat }}", 
+        descripcion: "{{ producto.descripcion }}", 
+        precio_unitario: "{{ producto.precio_unitario }}"
+    },
+    {% endfor %}
+    {% for servicio in servicios %}
+    "{{ servicio.sku }}": { 
+        clave_sat: "{{ servicio.clave_sat }}", 
+        unidad_sat: "{{ servicio.unidad_sat }}", 
+        descripcion: "{{ servicio.descripcion }}", 
+        precio_unitario: "{{ servicio.precio_unitario }}" 
+    },
+    {% endfor %}
+};
 
-        function actualizarCampos() {
-            var valor = $statusSelect.val();
-            $('#campo_abono').toggle(valor === 'ABONO');
-            $('#campo_fecha_pago').toggle(valor === 'PAGADO' || valor === 'ABONO');
-            $('#campo_vencimiento').toggle(valor === 'CREDITO');
+function fmt(n) {
+    return '$' + n.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// ==========================================
+// LÓGICA DE LOCALSTORAGE (BORRADOR)
+// ==========================================
+function guardarBorradorLocal() {
+    if (isRestoring) return; // No guardar mientras estamos restaurando
+
+    const conceptos = [];
+    $('#cuerpo-conceptos tr').each(function() {
+        const $fila = $(this);
+        const isDeleted = $fila.find('input[id$="-DELETE"]').is(':checked');
+        if (isDeleted || !$fila.is(':visible')) return;
+        
+        const sku = $fila.find('select[id$="-item_sku"]').val();
+        const cantidad = $fila.find('input[id$="-cantidad"]').val();
+        const precio = $fila.find('input[id$="-precio_unitario"]').val();
+        
+        if (sku && sku.trim() !== '') {
+            conceptos.push({ sku, cantidad, precio });
         }
-
-        $statusSelect.on('change', actualizarCampos);
-        actualizarCampos();
-
-        // Permitir buscar el cliente por RFC o por razón social, aunque el
-        // texto visible de cada opción sea solo el RFC.
-        function matchClienteOMatch(params, data) {
-            if (!params.term || params.term.trim() === '') {
-                return data;
-            }
-            if (typeof data.text === 'undefined') {
-                return null;
-            }
-            var term = params.term.toLowerCase();
-            var texto = data.text.toLowerCase();
-            var razonSocial = (data.element && data.element.getAttribute('data-razon-social') || '').toLowerCase();
-            if (texto.indexOf(term) > -1 || razonSocial.indexOf(term) > -1) {
-                return data;
-            }
-            return null;
-        }
-
-        var $clienteSelect = $('#id_rfc');
-        $clienteSelect.select2('destroy');
-        $clienteSelect.select2({
-            theme: 'bootstrap-5',
-            width: '100%',
-            placeholder: 'Buscar por RFC o razón social...',
-            allowClear: true,
-            matcher: matchClienteOMatch,
-        });
     });
+
+    const data = {
+        folio: document.getElementById('id_folio') ? document.getElementById('id_folio').value : '',
+        rfc: $('#id_rfc').val(),
+        razon_social: document.getElementById('razon_social').value,
+        codigo_postal: document.getElementById('codigo_postal').value,
+        status: $('#id_status').val(),
+        monto_abono: document.getElementById('id_monto_abono') ? document.getElementById('id_monto_abono').value : '',
+        fecha_pago: document.getElementById('id_fecha_pago') ? document.getElementById('id_fecha_pago').value : '',
+        fecha_vencimiento: document.getElementById('id_fecha_vencimiento') ? document.getElementById('id_fecha_vencimiento').value : '',
+        metodo_pago: $('#id_metodo_pago').val(),
+        forma_pago: $('#id_forma_pago').val(),
+        uso_cfdi: $('#id_uso_cfdi').val(),
+        iva: $('#id_iva').val(),
+        notas: document.getElementById('id_notas') ? document.getElementById('id_notas').value : '',
+        conceptos: conceptos
+    };
+
+    localStorage.setItem('borrador_factura', JSON.stringify(data));
+}
+
+function restaurarBorradorLocal() {
+    const savedData = localStorage.getItem('borrador_factura');
+    if (!savedData) {
+        agregarLinea();
+        return;
+    }
+
+    isRestoring = true;
+    const data = JSON.parse(savedData);
+
+    // Restaurar campos principales
+    if (data.folio && document.getElementById('id_folio')) document.getElementById('id_folio').value = data.folio;
+    if (data.rfc) { $('#id_rfc').val(data.rfc).trigger('change'); }
+    if (data.status) { $('#id_status').val(data.status).trigger('change'); }
+    if (data.metodo_pago) { $('#id_metodo_pago').val(data.metodo_pago).trigger('change'); }
+    if (data.forma_pago) { $('#id_forma_pago').val(data.forma_pago).trigger('change'); }
+    if (data.uso_cfdi) { $('#id_uso_cfdi').val(data.uso_cfdi).trigger('change'); }
+    if (data.iva) { $('#id_iva').val(data.iva).trigger('change'); }
+    
+    if (data.monto_abono && document.getElementById('id_monto_abono')) document.getElementById('id_monto_abono').value = data.monto_abono;
+    if (data.fecha_pago && document.getElementById('id_fecha_pago')) document.getElementById('id_fecha_pago').value = data.fecha_pago;
+    if (data.fecha_vencimiento && document.getElementById('id_fecha_vencimiento')) document.getElementById('id_fecha_vencimiento').value = data.fecha_vencimiento;
+    if (data.notas && document.getElementById('id_notas')) document.getElementById('id_notas').value = data.notas;
+
+    // Restaurar datos de texto directo del cliente
+    if (data.razon_social) document.getElementById('razon_social').value = data.razon_social;
+    if (data.codigo_postal) document.getElementById('codigo_postal').value = data.codigo_postal;
+
+    // Restaurar conceptos
+    if (data.conceptos && data.conceptos.length > 0) {
+        document.getElementById('cuerpo-conceptos').innerHTML = '';
+        $('#id_form-TOTAL_FORMS').val(0); // Reiniciar contador del formset
+
+        data.conceptos.forEach(item => {
+            agregarLinea();
+            const filas = document.querySelectorAll('#cuerpo-conceptos tr');
+            const ultimaFila = filas[filas.length - 1];
+            
+            if (item.sku) {
+                $(ultimaFila.querySelector('.sku-select')).val(item.sku).trigger('change');
+            }
+            if (item.cantidad) {
+                ultimaFila.querySelector('input[id$="-cantidad"]').value = item.cantidad;
+            }
+            if (item.precio) {
+                ultimaFila.querySelector('input[id$="-precio_unitario"]').value = item.precio;
+            }
+        });
+        calcularTotales();
+    } else {
+        agregarLinea();
+    }
+
+    setTimeout(() => {
+        isRestoring = false;
+    }, 500);
+}
+// ==========================================
+
+function agregarLinea() {
+    const $totalForms = $('#id_form-TOTAL_FORMS');
+    const nuevoIndice = parseInt($totalForms.val());
+    
+    const template = document.getElementById('template-linea').innerHTML;
+    const regexPrefijo = new RegExp('__prefix__', 'g');
+    const filaFormateada = template.replace(regexPrefijo, nuevoIndice);
+    
+    const $nuevaFila = $(filaFormateada);
+    $nuevaFila.find('.select2-container').remove();
+    
+    const $select = $nuevaFila.find('select[id$="-item_sku"]');
+    $select.addClass('form-select form-select-sm sku-select').css('min-width', '120px');
+    $nuevaFila.find('input[id$="-cantidad"]').addClass('form-control form-control-sm cantidad').css('min-width', '80px');
+    $nuevaFila.find('input[id$="-precio_unitario"]').addClass('form-control form-control-sm precio').css('min-width', '100px');
+    
+    $('#cuerpo-conceptos').append($nuevaFila);
+    
+    $select.select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: 'Seleccionar...',
+        allowClear: true
+    });
+    
+    $select.on('change select2:select select2:unselect', function() { 
+        autocompletar(this); 
+        guardarBorradorLocal();
+    });
+    $nuevaFila.find('.cantidad, .precio').on('input', function() {
+        calcularTotales();
+        guardarBorradorLocal();
+    });
+    
+    $totalForms.val(nuevoIndice + 1);
+    calcularTotales();
+}
+
+function autocompletar(select) {
+    const sku = select.value;
+    const $fila = $(select).closest('tr');
+    
+    if (sku && catalogoProductos[sku]) {
+        const p = catalogoProductos[sku];
+        $fila.find('.col-clave-sat').val(p.clave_sat);
+        $fila.find('.col-unidad-sat').val(p.unidad_sat);
+        $fila.find('.col-descripcion').val(p.descripcion);
+        $fila.find('input[id$="-precio_unitario"]').val(p.precio_unitario);
+    } else {
+        $fila.find('.col-clave-sat').val('');
+        $fila.find('.col-unidad-sat').val('');
+        $fila.find('.col-descripcion').val('');
+        $fila.find('input[id$="-precio_unitario"]').val('0');
+    }
+    calcularTotales();
+}
+
+function eliminarLinea(btn) {
+    const $fila = $(btn).closest('tr');
+    const $deleteInput = $fila.find('input[id$="-DELETE"]');
+    
+    if ($deleteInput.length) {
+        $deleteInput.prop('checked', true);
+        $fila.fadeOut(300, function() {
+            calcularTotales();
+            guardarBorradorLocal();
+        });
+    } else {
+        $fila.fadeOut(300, function() {
+            $fila.remove();
+            calcularTotales();
+            guardarBorradorLocal();
+        });
+    }
+}
+
+function calcularTotales() {
+    let base = 0;
+    
+    $('#cuerpo-conceptos tr').each(function() {
+        const $fila = $(this);
+        const isDeleted = $fila.find('input[id$="-DELETE"]').is(':checked');
+        if (isDeleted || !$fila.is(':visible')) return;
+        
+        const cant = parseFloat($fila.find('input[id$="-cantidad"]').val()) || 0;
+        const precio = parseFloat($fila.find('input[id$="-precio_unitario"]').val()) || 0;
+        const sub = cant * precio;
+        
+        $fila.find('.subtotal').val(sub.toFixed(2));
+        base += sub;
+    });
+    
+    const $ivaInput = $('#id_iva');
+    const ivaPct = $ivaInput.length ? (parseFloat($ivaInput.val()) || 0) : 16;
+    
+    const iva = base * (ivaPct / 100);
+    const total = base + iva;
+    
+    $('#display-base').text(fmt(base));
+    $('#display-iva').text(fmt(iva));
+    $('#display-total').text(fmt(total));
+    
+    $('#total_calculado').val(total.toFixed(2));
+}
+
+$(document).ready(function () {
+    var $statusSelect = $('#id_status');
+    $statusSelect.select2('destroy');
+    $statusSelect.addClass('form-select');
+
+    function actualizarCampos() {
+        var valor = $statusSelect.val();
+        $('#campo_abono').toggle(valor === 'ABONO');
+        $('#campo_fecha_pago').toggle(valor === 'PAGADO' || valor === 'ABONO');
+        $('#campo_vencimiento').toggle(valor === 'CREDITO');
+    }
+    $statusSelect.on('change', function() {
+        actualizarCampos();
+        guardarBorradorLocal();
+    });
+    actualizarCampos();
+
+    function matchClienteOMatch(params, data) {
+        if (!params.term || params.term.trim() === '') return data;
+        if (typeof data.text === 'undefined') return null;
+        var term = params.term.toLowerCase();
+        var texto = data.text.toLowerCase();
+        var razonSocial = (data.element && data.element.getAttribute('data-razon-social') || '').toLowerCase();
+        if (texto.indexOf(term) > -1 || razonSocial.indexOf(term) > -1) return data;
+        return null;
+    }
+
+    var $clienteSelect = $('#id_rfc');
+    $clienteSelect.select2('destroy');
+    $clienteSelect.select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: 'Buscar por RFC o razón social...',
+        allowClear: true,
+        matcher: matchClienteOMatch,
+    });
+
+    ['#id_forma_pago', '#id_metodo_pago', '#id_uso_cfdi'].forEach(function(selector) {
+        var $el = $(selector);
+        if ($el.length) {
+            $el.select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: 'Seleccionar...',
+                allowClear: true,
+                tags: true
+            });
+            $el.on('change select2:select select2:unselect', function() {
+                guardarBorradorLocal();
+            });
+        }
+    });
+
+    $('#id_rfc').on('select2:select', function(e) {
+        if (isRestoring) return; // Evitar que el fetch interrumpa la restauración
+        fetch(`/cotizaciones/api/cliente/${e.params.data.id}/`)
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('razon_social').value = data.razon_social;
+                document.getElementById('codigo_postal').value = data.codigo_postal;
+                guardarBorradorLocal();
+            });
+    });
+    $('#id_rfc').on('select2:unselect', function() {
+        document.getElementById('razon_social').value = '';
+        document.getElementById('codigo_postal').value = '';
+        guardarBorradorLocal();
+    });
+
+    // Escuchar cambios generales en inputs y selects para actualizar el borrador
+    document.getElementById('formFactura').addEventListener('input', guardarBorradorLocal);
+    document.getElementById('formFactura').addEventListener('change', guardarBorradorLocal);
+    $('#id_iva').on('select2:select select2:unselect change', function() {
+        calcularTotales();
+        guardarBorradorLocal();
+    });
+
+    // Cargar borrador local al iniciar
+    restaurarBorradorLocal();
+});
+
+document.getElementById('formFactura').addEventListener('submit', function(e) {
+    let hayLineasVacias = false;
+    
+    document.querySelectorAll('#cuerpo-conceptos tr').forEach(function(fila) {
+        const deleteInput = fila.querySelector('input[id$="-DELETE"]');
+        if (deleteInput && deleteInput.checked) return;
+        if (fila.style.display === 'none') return;
+
+        const skuSelect = fila.querySelector('select[id$="-item_sku"]');
+        const precioInput = fila.querySelector('input[id$="-precio_unitario"]');
+        
+        if (!skuSelect || !precioInput) return;
+
+        if (precioInput.value === '' || skuSelect.value === '') {
+            hayLineasVacias = true;
+            precioInput.classList.add('is-invalid');
+            skuSelect.classList.add('is-invalid');
+        } else {
+            precioInput.classList.remove('is-invalid');
+            skuSelect.classList.remove('is-invalid');
+        }
+    });
+
+    if (hayLineasVacias) {
+        e.preventDefault();
+        bootstrap.Toast.getOrCreateInstance(document.getElementById('toastLineasVacias')).show();
+        return;
+    }
+
+    const t = document.getElementById('total_calculado');
+    if (!t.value || !t.value.trim()) t.value = '0';
+
+    // LIMPIAR BORRADOR AL GUARDAR EXITOSAMENTE
+    localStorage.removeItem('borrador_factura');
+});
 </script>
 {% endblock %}

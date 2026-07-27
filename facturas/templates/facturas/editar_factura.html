@@ -1,107 +1,394 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Editar Factura{% endblock %}
+{% block title %}Editar Factura — {{ factura.folio }}{% endblock %}
 
 {% block content %}
-    <div class="card shadow p-4" style="max-width: 600px; margin: auto;">
-        <h2 class="mb-4">Editar Factura</h2>
-        <form method="post">
-            {% csrf_token %}
-            <div class="mb-3">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Editar Factura — {{ factura.folio }}</h2>
+    <a href="{% url 'lista_facturas' %}" class="btn btn-secondary"><i class="bi bi-arrow-left me-1"></i>Regresar</a>
+</div>
+
+<form method="post" id="formFactura" novalidate>
+    {% csrf_token %}
+    {% if form.errors %}
+        <div class="alert alert-danger mt-2">
+            <strong>Atención:</strong> El formulario no se pudo guardar.
+            {{ form.errors }}
+        </div>
+    {% endif %}
+    <input type="hidden" name="total_calculado" id="total_calculado">
+
+    <!-- Información General -->
+    <div class="card shadow-sm p-4 mb-4">
+        <h5 class="fw-bold mb-3">Información General</h5>
+        <div class="row g-3">
+            <div class="col-md-4">
                 <label class="form-label">Folio</label>
-                {{ form.folio }}
+                <input type="text" class="form-control" value="{{ factura.folio }}" readonly>
             </div>
-            <div class="mb-3">
-                <label class="form-label">RFC</label>
+            <div class="col-md-4">
+                <label class="form-label">Cliente</label>
                 {{ form.rfc }}
             </div>
-            <div class="mb-3">
-                <label class="form-label">Agente</label>
-                {{ form.agente }}
+            <div class="col-md-4">
+                <label class="form-label">Razón Social</label>
+                <input type="text" class="form-control" id="razon_social" value="{{ factura.rfc.razon_social }}" readonly>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Total</label>
-                {{ form.total }}
+            <div class="col-md-4">
+                <label class="form-label">Código Postal</label>
+                <input type="text" class="form-control" id="codigo_postal" value="{{ factura.rfc.codigo_postal }}" readonly>
             </div>
-            <div class="mb-3">
+            <div class="col-md-4">
                 <label class="form-label">Status</label>
                 {{ form.status }}
             </div>
-
-            <div class="mb-3" id="campo_abono" style="display:none;">
-                <label class="form-label">Monto Abonado</label>
+            <div class="col-md-4" id="campo_abono" style="display: none;">
+                <label class="form-label">Monto de Abono</label>
                 {{ form.monto_abono }}
             </div>
-
-            <div class="mb-3" id="campo_fecha_pago" style="display:none;">
+            <div class="col-md-4" id="campo_fecha_pago" style="display: none;">
                 <label class="form-label">Fecha de Pago / Abono</label>
                 {{ form.fecha_pago }}
             </div>
-
-            <div class="mb-3" id="campo_vencimiento" style="display:none;">
+            <div class="col-md-4" id="campo_vencimiento" style="display: none;">
                 <label class="form-label">Fecha de Vencimiento</label>
                 {{ form.fecha_vencimiento }}
             </div>
-
-            <div class="mb-3">
-                <label class="form-label">Notas</label>
-                {{ form.notas }}
-            </div>
-
-            <button type="submit" class="btn btn-warning w-100 mt-3">Guardar Cambios</button>
-        </form>
-        <a href="{% url 'lista_facturas' %}" class="btn btn-secondary w-100 mt-2">Cancelar</a>
+        </div>
     </div>
+
+    <!-- Conceptos -->
+    <div class="card shadow-sm p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">Conceptos</h5>
+        <button type="button" class="btn btn-primary btn-sm" onclick="agregarLinea()">
+        <i class="bi bi-plus me-1"></i>Agregar
+        </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover" id="tabla-conceptos">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:15%;">SKU</th>
+                        <th style="width:12%;">Clave SAT</th>
+                        <th style="width:10%;">Unidad SAT</th>
+                        <th style="width:25%;">Descripción</th>
+                        <th style="width:8%;">Cantidad</th>
+                        <th style="width:12%;">Precio Unit.</th>
+                        <th style="width:15%;">Subtotal</th>
+                        <th style="width:3%;"></th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpo-conceptos">
+                    {% for detalle in detalles %}
+                    <tr>
+                        <td>
+                            <select class="form-select form-select-sm sku-select" name="sku[]" style="min-width:120px;">
+                                <option value="">Seleccionar...</option>
+                                {% for producto in productos %}
+                                <option value="{{ producto.sku }}"
+                                    data-clave="{{ producto.clave_sat }}"
+                                    data-unidad="{{ producto.unidad_sat }}"
+                                    data-descripcion="{{ producto.descripcion }}"
+                                    data-precio="{{ producto.precio_unitario }}"
+                                    {% if detalle.producto and detalle.producto.sku == producto.sku %}selected{% endif %}>
+                                    {{ producto.sku }}
+                                </option>
+                                {% endfor %}
+                                {% for servicio in servicios %}
+                                <option value="{{ servicio.sku }}"
+                                    data-clave="{{ servicio.clave_sat }}"
+                                    data-unidad="{{ servicio.unidad_sat }}"
+                                    data-descripcion="{{ servicio.descripcion }}"
+                                    data-precio="{{ servicio.precio_unitario }}"
+                                    {% if detalle.servicio and detalle.servicio.sku == servicio.sku %}selected{% endif %}>
+                                    {{ servicio.sku }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td><input type="text" class="form-control form-control-sm" name="clave_sat[]" value="{% if detalle.producto %}{{ detalle.producto.clave_sat }}{% elif detalle.servicio %}{{ detalle.servicio.clave_sat }}{% endif %}" readonly style="min-width:100px;"></td>
+                        <td><input type="text" class="form-control form-control-sm" name="unidad_sat[]" value="{% if detalle.producto %}{{ detalle.producto.unidad_sat }}{% elif detalle.servicio %}{{ detalle.servicio.unidad_sat }}{% endif %}" readonly style="min-width:100px;"></td>
+                        <td><input type="text" class="form-control form-control-sm" name="descripcion[]" value="{% if detalle.producto %}{{ detalle.producto.descripcion }}{% elif detalle.servicio %}{{ detalle.servicio.descripcion }}{% endif %}" style="min-width:200px;"></td>
+                        <td><input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="{{ detalle.cantidad }}" min="1" style="min-width:80px;"></td>
+                        <td><input type="number" class="form-control form-control-sm precio" name="precio_unitario[]" value="{{ detalle.precio_unitario }}" step="0.01" style="min-width:100px;"></td>
+                        <td><input type="number" class="form-control form-control-sm subtotal" value="{{ detalle.subtotal }}" readonly style="min-width:100px;"></td>
+                        <td><button type="button" class="btn btn-danger btn-sm" onclick="eliminarLinea(this)"><i class="bi bi-trash"></i></button></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="row justify-content-end mt-3">
+            <div class="col-md-4">
+                <table class="table table-sm">
+                    <tr>
+                        <td class="text-muted">Base:</td>
+                        <td class="text-end fw-bold" id="display-base">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">IVA:</td>
+                        <td class="text-end fw-bold" id="display-iva">$0.00</td>
+                    </tr>
+                    <tr class="table-dark">
+                        <td class="fw-bold">Total:</td>
+                        <td class="text-end fw-bold" id="display-total">$0.00</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Condiciones de Facturación -->
+    <div class="card shadow-sm p-4 mb-4">
+        <h5 class="fw-bold mb-3">Condiciones de Facturación</h5>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Método de Pago</label>
+                {{ form.metodo_pago }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Forma de Pago</label>
+                {{ form.forma_pago }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Uso de CFDI</label>
+                {{ form.uso_cfdi }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">IVA (%)</label>
+                <select id="id_iva" class="form-select">
+                    <option value="16" {% if factura.iva == 16 %}selected{% endif %}>16%</option>
+                    <option value="8" {% if factura.iva == 8 %}selected{% endif %}>8%</option>
+                    <option value="0" {% if factura.iva == 0 %}selected{% endif %}>0%</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notas -->
+    <div class="card shadow-sm p-4 mb-4">
+        <h5 class="fw-bold mb-3">Notas Internas</h5>
+        {{ form.notas }}
+    </div>
+
+    <div class="d-flex gap-2 justify-content-end mb-5">
+        <a href="{% url 'lista_facturas' %}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-warning">Guardar Cambios</button>
+    </div>
+</form>
+
+<!-- Template línea nueva -->
+<template id="template-linea">
+    <tr>
+        <td>
+            <select class="form-select form-select-sm sku-select" name="sku[]" style="min-width:120px;">
+                <option value="">Seleccionar...</option>
+                {% for producto in productos %}
+                <option value="{{ producto.sku }}"
+                    data-clave="{{ producto.clave_sat }}"
+                    data-unidad="{{ producto.unidad_sat }}"
+                    data-descripcion="{{ producto.descripcion }}"
+                    data-precio="{{ producto.precio_unitario }}">
+                    {{ producto.sku }}
+                </option>
+                {% endfor %}
+                {% for servicio in servicios %}
+                <option value="{{ servicio.sku }}"
+                    data-clave="{{ servicio.clave_sat }}"
+                    data-unidad="{{ servicio.unidad_sat }}"
+                    data-descripcion="{{ servicio.descripcion }}"
+                    data-precio="{{ servicio.precio_unitario }}">
+                    {{ servicio.sku }}
+                </option>
+                {% endfor %}
+            </select>
+        </td>
+        <td><input type="text" class="form-control form-control-sm" name="clave_sat[]" readonly style="min-width:100px;"></td>
+        <td><input type="text" class="form-control form-control-sm" name="unidad_sat[]" readonly style="min-width:100px;"></td>
+        <td><input type="text" class="form-control form-control-sm" name="descripcion[]" style="min-width:200px;"></td>
+        <td><input type="number" class="form-control form-control-sm cantidad" name="cantidad[]" value="1" min="1" style="min-width:80px;"></td>
+        <td><input type="number" class="form-control form-control-sm precio" name="precio_unitario[]" value="0" step="0.01" style="min-width:100px;"></td>
+        <td><input type="number" class="form-control form-control-sm subtotal" value="0" readonly style="min-width:100px;"></td>
+        <td><button type="button" class="btn btn-danger btn-sm" onclick="eliminarLinea(this)"><i class="bi bi-trash"></i></button></td>
+    </tr>
+</template>
+
+<!-- Toast líneas vacías -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+    <div id="toastLineasVacias" class="toast align-items-center text-bg-danger border-0" role="alert" data-bs-delay="4000">
+        <div class="d-flex">
+            <div class="toast-body fs-6">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                Agrega un producto o elimina la línea.
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
-    $(document).ready(function () {
-        var $statusSelect = $('#id_status');
+const catalogoProductos = {
+    {% for producto in productos %}
+    "{{ producto.sku }}": { clave_sat: "{{ producto.clave_sat }}", unidad_sat: "{{ producto.unidad_sat }}", descripcion: "{{ producto.descripcion }}", precio_unitario: {{ producto.precio_unitario }} },
+    {% endfor %}
+    {% for servicio in servicios %}
+    "{{ servicio.sku }}": { clave_sat: "{{ servicio.clave_sat }}", unidad_sat: "{{ servicio.unidad_sat }}", descripcion: "{{ servicio.descripcion }}", precio_unitario: {{ servicio.precio_unitario }} },
+    {% endfor %}
+};
 
-        // Quitar Select2 del select de status y dejarlo como select nativo con estilo Bootstrap
-        $statusSelect.select2('destroy');
-        $statusSelect.addClass('form-select');
+function fmt(n) {
+    return '$' + n.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 
-        function actualizarCampos() {
-            var valor = $statusSelect.val();
-            $('#campo_abono').toggle(valor === 'ABONO');
-            $('#campo_fecha_pago').toggle(valor === 'PAGADO' || valor === 'ABONO');
-            $('#campo_vencimiento').toggle(valor === 'CREDITO');
-        }
+function agregarLinea() {
+    const clon = document.getElementById('template-linea').content.cloneNode(true);
+    const tbody = document.getElementById('cuerpo-conceptos');
+    tbody.appendChild(clon);
+    const fila = tbody.lastElementChild;
+    const $skuSelect = $(fila.querySelector('.sku-select'));
+    $skuSelect.select2({ theme: 'bootstrap-5', width: '100%', placeholder: 'Seleccionar...', allowClear: true });
+    $skuSelect.on('change select2:select select2:unselect', function() { autocompletar(this); });
+    fila.querySelector('.cantidad').addEventListener('input', calcularTotales);
+    fila.querySelector('.precio').addEventListener('input', calcularTotales);
+    calcularTotales();
+}
 
-        $statusSelect.on('change', actualizarCampos);
+function autocompletar(select) {
+    const sku = select.value;
+    const fila = select.closest('tr');
+    if (sku && catalogoProductos[sku]) {
+        const p = catalogoProductos[sku];
+        fila.querySelector('[name="clave_sat[]"]').value       = p.clave_sat;
+        fila.querySelector('[name="unidad_sat[]"]').value      = p.unidad_sat;
+        fila.querySelector('[name="descripcion[]"]').value     = p.descripcion;
+        fila.querySelector('[name="precio_unitario[]"]').value = p.precio_unitario;
+    } else {
+        fila.querySelector('[name="clave_sat[]"]').value       = '';
+        fila.querySelector('[name="unidad_sat[]"]').value      = '';
+        fila.querySelector('[name="descripcion[]"]').value     = '';
+        fila.querySelector('[name="precio_unitario[]"]').value = '0';
+    }
+    calcularTotales();
+}
 
-        // Permitir buscar el cliente por RFC o por razón social, aunque el
-        // texto visible de cada opción sea solo el RFC.
-        function matchClienteOMatch(params, data) {
-            if (!params.term || params.term.trim() === '') {
-                return data;
-            }
-            if (typeof data.text === 'undefined') {
-                return null;
-            }
-            var term = params.term.toLowerCase();
-            var texto = data.text.toLowerCase();
-            var razonSocial = (data.element && data.element.getAttribute('data-razon-social') || '').toLowerCase();
-            if (texto.indexOf(term) > -1 || razonSocial.indexOf(term) > -1) {
-                return data;
-            }
-            return null;
-        }
+function eliminarLinea(btn) {
+    btn.closest('tr').remove();
+    calcularTotales();
+}
 
-        var $clienteSelect = $('#id_rfc');
-        $clienteSelect.select2('destroy');
-        $clienteSelect.select2({
-            theme: 'bootstrap-5',
-            width: '100%',
-            placeholder: 'Buscar por RFC o razón social...',
-            allowClear: true,
-            matcher: matchClienteOMatch,
-        });
-
-        // Ejecutar al cargar para mostrar campos si ya hay un status guardado
-        actualizarCampos();
+function calcularTotales() {
+    let base = 0;
+    document.querySelectorAll('#cuerpo-conceptos tr').forEach(fila => {
+        const cant   = parseFloat(fila.querySelector('.cantidad').value) || 0;
+        const precio = parseFloat(fila.querySelector('.precio').value)   || 0;
+        const sub    = cant * precio;
+        fila.querySelector('.subtotal').value = sub.toFixed(2);
+        base += sub;
     });
+    const ivaPct = parseFloat(document.getElementById('id_iva').value) || 0;
+    const iva    = base * (ivaPct / 100);
+    const total  = base + iva;
+    document.getElementById('display-base').textContent  = fmt(base);
+    document.getElementById('display-iva').textContent   = fmt(iva);
+    document.getElementById('display-total').textContent = fmt(total);
+    document.getElementById('total_calculado').value     = total.toFixed(2);
+}
+
+// Listeners para filas existentes (vienen del servidor)
+document.querySelectorAll('#cuerpo-conceptos tr').forEach(function(fila) {
+    const $skuSelect = $(fila.querySelector('.sku-select'));
+    $skuSelect.select2({ theme: 'bootstrap-5', width: '100%', placeholder: 'Seleccionar...', allowClear: true });
+    $skuSelect.on('change select2:select select2:unselect', function() { autocompletar(this); });
+    fila.querySelector('.cantidad').addEventListener('input', calcularTotales);
+    fila.querySelector('.precio').addEventListener('input', calcularTotales);
+});
+
+// Validación al guardar
+document.getElementById('formFactura').addEventListener('submit', function(e) {
+    let hayLineasVacias = false;
+    document.querySelectorAll('#cuerpo-conceptos tr').forEach(function(fila) {
+        const precio = parseFloat(fila.querySelector('.precio').value) || 0;
+        const sku    = fila.querySelector('.sku-select').value;
+        fila.querySelector('.subtotal').value = (parseFloat(fila.querySelector('.cantidad').value || 0) * precio).toFixed(2);
+        if (precio === 0 || sku === '') {
+            hayLineasVacias = true;
+            fila.querySelector('.precio').classList.add('is-invalid');
+            fila.querySelector('.sku-select').classList.add('is-invalid');
+        } else {
+            fila.querySelector('.precio').classList.remove('is-invalid');
+            fila.querySelector('.sku-select').classList.remove('is-invalid');
+        }
+    });
+    if (hayLineasVacias) {
+        e.preventDefault();
+        bootstrap.Toast.getOrCreateInstance(document.getElementById('toastLineasVacias')).show();
+        return;
+    }
+    const t = document.getElementById('total_calculado');
+    if (!t.value || !t.value.trim()) t.value = '0';
+});
+
+document.getElementById('id_iva').addEventListener('change', calcularTotales);
+
+// RFC autocomplete con matcher por razón social
+window.afterSelect2 = function() {
+    calcularTotales();
+
+    function matchClienteOMatch(params, data) {
+        if (!params.term || params.term.trim() === '') return data;
+        if (typeof data.text === 'undefined') return null;
+        var term = params.term.toLowerCase();
+        var texto = data.text.toLowerCase();
+        var razonSocial = (data.element && data.element.getAttribute('data-razon-social') || '').toLowerCase();
+        if (texto.indexOf(term) > -1 || razonSocial.indexOf(term) > -1) return data;
+        return null;
+    }
+
+    var $clienteSelect = $('#id_rfc');
+    $clienteSelect.select2('destroy');
+    $clienteSelect.select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: 'Buscar por RFC o razón social...',
+        allowClear: true,
+        matcher: matchClienteOMatch,
+    });
+};
+
+$('#id_rfc').on('select2:select', function(e) {
+    fetch(`/cotizaciones/api/cliente/${e.params.data.id}/`)
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('razon_social').value = data.razon_social;
+            document.getElementById('codigo_postal').value = data.codigo_postal;
+        });
+});
+$('#id_rfc').on('select2:unselect', function() {
+    document.getElementById('razon_social').value = '';
+    document.getElementById('codigo_postal').value = '';
+});
+
+$(document).ready(function() {
+    var $statusSelect = $('#id_status');
+    $statusSelect.select2('destroy');
+    $statusSelect.addClass('form-select');
+
+    function actualizarCampos() {
+        var valor = $statusSelect.val();
+        $('#campo_abono').toggle(valor === 'ABONO');
+        $('#campo_fecha_pago').toggle(valor === 'PAGADO' || valor === 'ABONO');
+        $('#campo_vencimiento').toggle(valor === 'CREDITO');
+    }
+    $statusSelect.on('change', actualizarCampos);
+    actualizarCampos();
+
+    calcularTotales();
+});
 </script>
 {% endblock %}
