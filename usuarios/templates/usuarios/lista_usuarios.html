@@ -66,7 +66,12 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Contraseña</label>
-                                {{ form.password }}
+                                <div class="input-group">
+                                    {{ form.password }}
+                                    <button type="button" class="btn btn-outline-secondary" id="togglePasswordModal">
+                                        <i id="toggleIconModal" class="bi bi-eye"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Nombre</label>
@@ -100,4 +105,22 @@
             </div>
         </div>
     </div>
+
+<script>
+    document.getElementById('togglePasswordModal').addEventListener('click', function () {
+        // Django le asigna id="id_password" por defecto a {{ form.password }}
+        const passwordInput = document.getElementById('modal_password_input');
+        const toggleIcon = document.getElementById('toggleIconModal');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('bi-eye');
+            toggleIcon.classList.add('bi-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('bi-eye-slash');
+            toggleIcon.classList.add('bi-eye');
+        }
+    });
+</script>
 {% endblock %}

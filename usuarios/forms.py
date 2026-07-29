@@ -32,7 +32,11 @@ class RolForm(forms.ModelForm):
 
 class UsuarioForm(forms.ModelForm):
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Contraseña'}),
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control', 
+            'placeholder': 'Contraseña',
+            'id': 'modal_password_input'
+            }),
         required=False,
         label='Contraseña'
     )
