@@ -83,22 +83,6 @@
                     </tr>
                 </thead>
                 <tbody id="cuerpo-conceptos">
-                    {% for detalle_form in formset %}
-                    <tr class="fila-producto">
-                        {{ detalle_form.id }}
-                        <td class="d-none">{{ detalle_form.DELETE }}</td>
-                        <td>{{ detalle_form.item_sku }}</td>
-                        <td><input type="text" class="form-control form-control-sm col-clave-sat" readonly style="min-width:100px;"></td>
-                        <td><input type="text" class="form-control form-control-sm col-unidad-sat" readonly style="min-width:100px;"></td>
-                        <td><input type="text" class="form-control form-control-sm col-descripcion" style="min-width:200px;" readonly></td>
-                        <td>{{ detalle_form.cantidad }}</td>
-                        <td>{{ detalle_form.precio_unitario }}</td>
-                        <td><input type="number" class="form-control form-control-sm subtotal" value="0" readonly style="min-width:100px;"></td>
-                        <td>
-                            <button type="button" class="btn btn-danger btn-sm" onclick="eliminarLinea(this)"><i class="bi bi-trash"></i></button>
-                        </td>
-                    </tr>
-                    {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -269,7 +253,7 @@ function guardarBorradorLocal() {
 function restaurarBorradorLocal() {
     const savedData = localStorage.getItem('borrador_factura');
     if (!savedData) {
-        agregarLinea();
+            agregarLinea();
         return;
     }
 
