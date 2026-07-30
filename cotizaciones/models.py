@@ -66,6 +66,7 @@ class Cotizacion(models.Model):
 
     folio = models.CharField(max_length=50, primary_key=True, default=generar_folio, editable=False)
     rfc = models.ForeignKey(Cliente, on_delete=models.CASCADE, db_column='rfc', null=True, blank=True)
+    empresa = models.ForeignKey('configuracion.ConfiguracionEmpresa', on_delete=models.SET_NULL, null=True, blank=True, related_name='cotizaciones', verbose_name='Empresa emisora')
     contacto = models.ForeignKey('directorio.Contacto', on_delete=models.SET_NULL, null=True, blank=True)
     agente = models.ForeignKey('agentes.Agente', on_delete=models.SET_NULL, null=True, blank=True)
     solicitud = models.TextField(blank=True, null=True)

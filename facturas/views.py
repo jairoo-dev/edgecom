@@ -108,6 +108,9 @@ def agregar_factura(request):
             return redirect('lista_facturas')
     else:
         initial = {'agente': agente_usuario} if agente_usuario else {}
+        empresa_default = ConfiguracionEmpresa.objects.first()
+        if empresa_default:
+            initial['empresa'] = empresa_default
         form = FacturaForm(initial=initial)
         formset = DetalleFacturaFormSet()
 
@@ -273,7 +276,7 @@ def conectar_facturama(factura):
     usuario  = os.getenv('FACTURAMA_USER')
     password = os.getenv('FACTURAMA_PASS')
 
-    empresa = ConfiguracionEmpresa.objects.first()
+    empresa = factura.empresa or ConfiguracionEmpresa.objects.first()
     expedicion = empresa.codigo_postal if empresa and empresa.codigo_postal else '06000'
 
     items = []

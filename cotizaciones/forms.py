@@ -6,8 +6,9 @@ from core.widgets import ClienteSelect
 class CotizacionForm(forms.ModelForm):
     class Meta:
         model = Cotizacion
-        fields = ['rfc', 'contacto', 'agente', 'cuenta', 'solicitud', 'status', 'iva', 'moneda', 'forma_pago', 'vigencia', 'tiempo_entrega', 'lugar_entrega', 'notas', 'observaciones']
+        fields = ['empresa', 'rfc', 'contacto', 'agente', 'cuenta', 'solicitud', 'status', 'iva', 'moneda', 'forma_pago', 'vigencia', 'tiempo_entrega', 'lugar_entrega', 'notas', 'observaciones']
         widgets = {
+            'empresa': forms.Select(attrs={'class': 'form-select'}),
             'rfc': ClienteSelect(attrs={'class': 'form-select'}),
             'contacto': forms.Select(attrs={'class': 'form-select'}),
             'agente': forms.Select(attrs={'class': 'form-select'}),

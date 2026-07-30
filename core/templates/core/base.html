@@ -141,7 +141,7 @@
             </div>
             {% if request.user.is_superuser or request.user.is_staff %}
             <div class="sidebar-opciones">
-                <a href="{% url 'configuracion' %}" class="sidebar-link">
+                <a href="{% url 'configuracion:lista_empresas' %}" class="sidebar-link">
                     <i class="bi bi-gear"></i> Configuración
                 </a>
             </div>

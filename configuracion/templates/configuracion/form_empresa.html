@@ -1,0 +1,97 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container mt-4 mb-5" style="max-width: 800px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ titulo }}</h2>
+        <a href="{% url 'configuracion:lista_empresas' %}" class="btn btn-outline-secondary btn-sm">Volver a la lista</a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        Por favor corrige los errores en el formulario.
+                    </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label fw-bold">Nombre</label>
+                        {{ form.nombre }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">RFC</label>
+                        {{ form.rfc }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label fw-bold">Régimen Fiscal</label>
+                        {{ form.regimen_fiscal }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Código Postal</label>
+                        {{ form.codigo_postal }}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Dirección</label>
+                    {{ form.direccion }}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Teléfono</label>
+                        {{ form.telefono }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">WhatsApp</label>
+                        {{ form.whatsapp }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Email</label>
+                        {{ form.email }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label fw-bold">Sitio Web</label>
+                        {{ form.sitio_web }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Color Primario</label>
+                        {{ form.color_primario }}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Logo</label>
+                    {{ form.logo }}
+                    {% if empresa.logo %}
+                        <div class="mt-2">
+                            <small class="text-muted">Logo actual:</small><br>
+                            <img src="{{ empresa.logo.url }}" alt="Logo" style="max-height: 50px;" class="mt-1">
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Pie de Página</label>
+                    {{ form.pie_pagina }}
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="{% url 'configuracion:lista_empresas' %}" class="btn btn-light">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Guardar Empresa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

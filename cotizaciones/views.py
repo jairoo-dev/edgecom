@@ -150,6 +150,9 @@ def agregar_cotizacion(request):
             return redirect('lista_cotizaciones')
     else:
         initial = {'agente': agente_usuario} if agente_usuario else {}
+        empresa_default = ConfiguracionEmpresa.objects.first()
+        if empresa_default:
+            initial['empresa'] = empresa_default
         form = CotizacionForm(initial=initial)
         if agente_usuario:
             form.fields['agente'].widget.attrs['disabled'] = True
@@ -289,7 +292,7 @@ def generar_pdf(request, folio):
     base = sum(d.subtotal for d in detalles)
     monto_iva = base * iva_pct
 
-    empresa = ConfiguracionEmpresa.objects.first()
+    empresa = cotizacion.empresa or ConfiguracionEmpresa.objects.first()
 
     # Logo
     if empresa and empresa.logo:

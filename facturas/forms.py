@@ -40,12 +40,13 @@ class FacturaForm(forms.ModelForm):
     class Meta:
         model = Factura
         fields = [
-            'folio', 'rfc', 'agente', 'total', 'status', 
+            'folio', 'empresa', 'rfc', 'agente', 'total', 'status', 
             'monto_abono', 'fecha_pago', 'fecha_vencimiento', 'notas',
             'forma_pago', 'metodo_pago', 'uso_cfdi'
         ]
         widgets = {
             'folio':             forms.TextInput(attrs={'class': 'form-control'}),
+            'empresa':           forms.Select(attrs={'class': 'form-select'}),
             'rfc':               ClienteSelect(attrs={'class': 'form-select'}),
             'agente':            forms.Select(attrs={'class': 'form-select'}),
             'total':             forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0.00', 'readonly': 'readonly'}),

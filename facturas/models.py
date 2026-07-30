@@ -16,6 +16,7 @@ class Factura(models.Model):
     ]
 
     rfc = models.ForeignKey(Cliente, on_delete=models.CASCADE, db_column='rfc')
+    empresa = models.ForeignKey('configuracion.ConfiguracionEmpresa', on_delete=models.SET_NULL, null=True, blank=True, related_name='facturas', verbose_name='Empresa emisora')
     folio = models.CharField(max_length=50, primary_key=True)
     total = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
