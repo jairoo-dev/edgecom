@@ -43,7 +43,11 @@
                 <i class="bi bi-layout-sidebar"></i>
             </button>
             <a class="navbar-brand" href="{% url 'dashboard' %}">
-                <img src="{% static 'core/img/logo.png' %}" alt="EDGECOM" height="30" class="d-inline-block align-text-top">
+                {% if empresa and empresa.logo %}
+                    <img src="{{ empresa.logo.url }}" alt="{{ empresa.nombre|default:'EDGECOM' }}" height="30" class="d-inline-block align-text-top">
+                {% else %}
+                    LOGOTIPO
+                {% endif %}
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
