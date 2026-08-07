@@ -40,25 +40,30 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 20px;
-            margin-left: -0.3cm;
+            padding-bottom: 15px;
+            margin-left: 0;
         }
         .header-col {
-            flex: 1; /* Hace que las tres columnas ocupen el mismo ancho proporcional */
+            flex: 1;
+        }
+        .logo{
+            text-align: left;
         }
         .logo-col {
             text-align: left;
         }
 
         .titulo-col {
-            text-align: center; /* Centra el texto dentro de su columna */
+            text-align: center;
         }
 
         .espacio-col {
-            /* Mantiene el balance a la derecha simétrico al logo de la izquierda */
+            visibility: hidden;
         }
         .logo img {
-            height: 60px;
+            height: 38px;
+            width: auto;
+            object-fit: contain;
         }
         .empresa-info {
             text-align: left;
@@ -100,11 +105,12 @@
 
         /* CONTENIDO */
         .titulo {
-            font-size: 30px;
+            font-size: 24px;
             font-weight: bold;
             margin: 0;
             padding: 0;
             color: {{ empresa.color_primario|default:"#1a5276" }};
+            letter-spacing: 1px;
         }
         .seccion-folio-cliente {
             display: flex;
@@ -275,7 +281,11 @@
     <!-- ENCABEZADO FIJO -->
     <div class="header">
         <div class="header-col logo-col">
-            <img src="{{ logo_path }}" alt="{{ empresa.nombre|default:'EDGECOM' }}">
+            {% if empresa and empresa.logo %}
+                <img src="{{ empresa.logo.path }}" alt="{{ empresa.nombre|default:'EDGECOM' }}">
+            {% else %}
+                <img src="{{ logo_path }}" alt="Logo">
+            {% endif %}
         </div>
         <div class="header-col titulo-col">
             <div class="titulo">COTIZACIÓN</div>
