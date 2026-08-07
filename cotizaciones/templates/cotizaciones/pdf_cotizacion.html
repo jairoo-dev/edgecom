@@ -280,11 +280,11 @@
 
     <!-- ENCABEZADO FIJO -->
     <div class="header">
-        <div class="header-col logo-col">
+        <div class="header-col logo">
             {% if empresa and empresa.logo %}
-                <img src="{{ empresa.logo.path }}" alt="{{ empresa.nombre|default:'EDGECOM' }}">
+                <img src="{{ empresa.logo.url }}" alt="{{ empresa.nombre|default:'EDGECOM' }}">
             {% else %}
-                <img src="{{ logo_path }}" alt="Logo">
+                <img src="{% static 'core/logo.png' %}" alt="Logo">
             {% endif %}
         </div>
         <div class="header-col titulo-col">
@@ -437,11 +437,12 @@
             <p style="margin:0; line-height:1.4;">{{ cotizacion.agente.nombre }}<br>{{ cotizacion.agente.telefono }}<br>{{ cotizacion.agente.email }}</p>
         </div>
         <div class="firma-box">
-            {% if cotizacion.agente.firma %}
-            <img src="{{ firma_path }}">
+            {% if cotizacion.agente and cotizacion.agente.firma %}
+                <img src="{{ cotizacion.agente.firma.url }}" alt="Firma de {{ cotizacion.agente.nombre }}">
             {% endif %}
             <div class="firma-linea">
-                Nombre: {{ cotizacion.agente.nombre }}
+                {{ cotizacion.agente.nombre }}<br>
+                {{ cotizacion.agente.puesto }}
             </div>
         </div>
     </div>

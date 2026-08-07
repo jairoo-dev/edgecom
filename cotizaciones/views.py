@@ -294,28 +294,19 @@ def generar_pdf(request, folio):
 
     empresa = cotizacion.empresa or ConfiguracionEmpresa.objects.first()
 
-    # Logo
-    if empresa and empresa.logo:
-        logo_path = os.path.join(settings.MEDIA_ROOT, str(empresa.logo))
-    else:
-        logo_path = os.path.join(settings.BASE_DIR, 'core', 'static', 'core', 'logo.png')
-
-    # Firma
-    firma_path = ''
-    if cotizacion.agente and cotizacion.agente.firma:
-        firma_path = os.path.join(settings.MEDIA_ROOT, str(cotizacion.agente.firma))
-
     html_string = render_to_string('cotizaciones/pdf_cotizacion.html', {
         'cotizacion': cotizacion,
         'detalles': detalles,
         'base': base,
         'monto_iva': monto_iva,
         'empresa': empresa,
-        'logo_path': f'file:///{logo_path}'.replace('\\', '/'),
-        'firma_path': f'file:///{firma_path}'.replace('\\', '/'),
-    })
-
-    pdf = HTML(string=html_string).write_pdf()
+    }, request=request)
+    
+    pdf = HTML(
+        string=html_string,
+        base_url=request.build_absolute_uri('/')
+    ).write_pdf()
+    
     response = HttpResponse(pdf, content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="{folio}.pdf"'
     return response
