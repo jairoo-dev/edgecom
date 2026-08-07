@@ -42,7 +42,21 @@
             align-items: center;
             padding-bottom: 20px;
             margin-left: -0.3cm;
-}
+        }
+        .header-col {
+            flex: 1; /* Hace que las tres columnas ocupen el mismo ancho proporcional */
+        }
+        .logo-col {
+            text-align: left;
+        }
+
+        .titulo-col {
+            text-align: center; /* Centra el texto dentro de su columna */
+        }
+
+        .espacio-col {
+            /* Mantiene el balance a la derecha simétrico al logo de la izquierda */
+        }
         .logo img {
             height: 60px;
         }
@@ -86,13 +100,12 @@
 
         /* CONTENIDO */
         .titulo {
-            text-align: center;
             font-size: 30px;
             font-weight: bold;
             margin: 0;
             padding: 0;
             color: {{ empresa.color_primario|default:"#1a5276" }};
-}
+        }
         .seccion-folio-cliente {
             display: flex;
             justify-content: space-between;
@@ -261,10 +274,14 @@
 
     <!-- ENCABEZADO FIJO -->
     <div class="header">
-        <div class="logo">
+        <div class="header-col logo-col">
             <img src="{{ logo_path }}" alt="{{ empresa.nombre|default:'EDGECOM' }}">
         </div>
-        <div class="titulo">COTIZACIÓN
+        <div class="header-col titulo-col">
+            <div class="titulo">COTIZACIÓN</div>
+        </div>
+        <div class="header-col espacio-col">
+        <!-- Espacio vacío para equilibrar el centro -->
         </div>
     </div>
 

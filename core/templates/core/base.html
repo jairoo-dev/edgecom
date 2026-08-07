@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -41,7 +42,9 @@
             <button class="toggle-btn me-2" id="sidebarToggle">
                 <i class="bi bi-layout-sidebar"></i>
             </button>
-            <a class="navbar-brand fw-bold" href="{% url 'dashboard' %}">EDGECOM</a>
+            <a class="navbar-brand" href="{% url 'dashboard' %}">
+                <img src="{% static 'core/img/logo.png' %}" alt="EDGECOM" height="30" class="d-inline-block align-text-top">
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
