@@ -1,6 +1,8 @@
-from .models import Empresa  # Ajusta al nombre real de tu modelo de Empresa
+from configuracion.models import ConfiguracionEmpresa 
 
 def datos_empresa(request):
-    # Obtiene el primer registro de la empresa configurada
-    empresa = Empresa.objects.first()
+    try:
+        empresa = ConfiguracionEmpresa.objects.first()
+    except ConfiguracionEmpresa.DoesNotExist:
+        empresa = None
     return {'empresa': empresa}

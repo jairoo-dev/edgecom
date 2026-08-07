@@ -46,7 +46,7 @@
                 {% if empresa and empresa.logo %}
                     <img src="{{ empresa.logo.url }}" alt="{{ empresa.nombre|default:'EDGECOM' }}" height="30" class="d-inline-block align-text-top">
                 {% else %}
-                    LOGOTIPO
+                    <img src="{% static 'core/img/logo.png' %}" alt="Logo" height="30" class="d-inline-block align-text-top">
                 {% endif %}
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
