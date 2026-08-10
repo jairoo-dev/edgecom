@@ -152,7 +152,7 @@
                     <td>{{ cotizacion.fecha|date:"d/m/Y" }}</td>
                     <td>
                         <!-- Botón de acceso rápido para el PDF -->
-                        <a href="{% url 'generar_pdf' cotizacion.folio %}" class="btn btn-success btn-sm me-1">
+                        <a href="{% url 'generar_pdf' cotizacion.folio %}" class="btn btn-success btn-sm me-1" target="_blank">
                             <i class="bi bi-file-earmark-pdf"></i> PDF
                         </a>
     

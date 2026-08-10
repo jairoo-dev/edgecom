@@ -7,7 +7,27 @@
         <h2 class="mb-4">Editar Producto</h2>
         <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
+            <div class="mb-3">
+                <label class="form-label fw-bold">SKU</label>
+                <input type="text" class="form-control" value="{{ form.instance.sku }}" readonly disabled>
+                <input type="hidden" name="sku" value="{{ form.instance.sku }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Clave SAT</label>
+                {{ form.clave_sat }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Descripción</label>
+                {{ form.descripcion }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Unidad SAT</label>
+                {{ form.unidad_sat }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Precio Unitario</label>
+                {{ form.precio_unitario }}
+            </div>
             <button type="submit" class="btn btn-warning w-100 mt-3">Guardar Cambios</button>
         </form>
         <a href="{% url 'lista_productos' %}" class="btn btn-secondary w-100 mt-2">Cancelar</a>
