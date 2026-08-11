@@ -66,7 +66,8 @@ class DetalleFacturaForm(forms.ModelForm):
     item_sku = forms.ChoiceField(
         choices=[],
         widget=forms.Select(attrs={'class': 'form-select'}),
-        label="Concepto"
+        label="Concepto",
+        required=False  # No requerido para permitir filas vacías
     )
 
     class Meta:
@@ -87,12 +88,40 @@ class DetalleFacturaForm(forms.ModelForm):
         serv_choices = [(s.sku, f" {s.descripcion} (Serv)") for s in servicios]
         
         self.fields['item_sku'].choices = [('', 'Seleccione un concepto...')] + prod_choices + serv_choices
+        
+        # Hacer cantidad y precio no requeridos para permitir filas vacías
+        self.fields['cantidad'].required = False
+        self.fields['precio_unitario'].required = False
 
         if self.instance and self.instance.pk:
             if self.instance.producto:
                 self.fields['item_sku'].initial = self.instance.producto.sku
             elif self.instance.servicio:
                 self.fields['item_sku'].initial = self.instance.servicio.sku
+
+    def has_changed(self):
+        """Considerar una fila como sin cambios si el SKU está vacío."""
+        if not self.data.get(self.add_prefix('item_sku')):
+            return False
+        return super().has_changed()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        sku = cleaned_data.get('item_sku')
+        cantidad = cleaned_data.get('cantidad')
+        precio = cleaned_data.get('precio_unitario')
+
+        # Si el SKU está vacío, es una fila vacía — la ignoramos
+        if not sku:
+            return cleaned_data
+
+        # Si tiene SKU pero faltan cantidad o precio, sí es error
+        if not cantidad:
+            self.add_error('cantidad', 'Este campo es obligatorio cuando hay un concepto seleccionado.')
+        if not precio:
+            self.add_error('precio_unitario', 'Este campo es obligatorio cuando hay un concepto seleccionado.')
+
+        return cleaned_data
 
     def save(self, commit=True):
         instance = super().save(commit=False)

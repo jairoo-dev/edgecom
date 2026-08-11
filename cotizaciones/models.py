@@ -21,12 +21,12 @@ class Cotizacion(models.Model):
         ('PERDIDO', 'Perdido'),
         ('FACTURADO', 'Facturado'),
     ]
-
+    
     MONEDA_CHOICES = [
         ('MXN', 'MXN'),
         ('USD', 'USD'),
     ]
-
+    
     FORMA_PAGO_CHOICES = [
         ('ANTICIPADO', 'Por anticipado al recibir orden de compra'),
         ('ANTICIPO_25', 'Se requiere anticipo 25%'),
@@ -39,13 +39,13 @@ class Cotizacion(models.Model):
         ('CREDITO_60', 'Crédito 60 días'),
         ('CREDITO_90', 'Crédito 90 días'),
     ]
-
+    
     VIGENCIA_CHOICES = [
         ('10', '10 días'),
         ('30', '30 días'),
         ('60', '60 días'),
     ]
-
+    
     ENTREGA_CHOICES = [
         ('3', '3 días'),
         ('5', '5 días'),
@@ -57,13 +57,13 @@ class Cotizacion(models.Model):
         ('8S', '8 semanas'),
         ('12S', '12 semanas'),
     ]
-
+    
     IVA_CHOICES = [
         ('0', '0%'),
         ('8', '8%'),
         ('16', '16%'),
     ]
-
+    
     folio = models.CharField(max_length=50, primary_key=True, default=generar_folio, editable=False)
     rfc = models.ForeignKey(Cliente, on_delete=models.CASCADE, db_column='rfc', null=True, blank=True)
     empresa = models.ForeignKey('configuracion.ConfiguracionEmpresa', on_delete=models.SET_NULL, null=True, blank=True, related_name='cotizaciones', verbose_name='Empresa emisora')

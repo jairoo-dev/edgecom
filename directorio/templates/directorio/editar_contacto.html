@@ -5,9 +5,20 @@
 {% block content %}
     <div class="card shadow p-4" style="max-width: 600px; margin: auto;">
         <h2 class="mb-4">Editar Contacto</h2>
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            Por favor corrige los errores indicados.
+        </div>
+        {% endif %}
+
         <form method="post">
             {% csrf_token %}
             <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Tipo</label>
+                    {{ form.tipo }}
+                </div>
                 <div class="col-md-6">
                     <label class="form-label">Nombre</label>
                     {{ form.nombre }}
@@ -20,7 +31,7 @@
                     <label class="form-label">Teléfono</label>
                     {{ form.telefono }}
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <label class="form-label">Email</label>
                     {{ form.email }}
                 </div>

@@ -7,7 +7,6 @@ class Rol(models.Model):
     # Módulos principales
     puede_ver_facturas = models.BooleanField(default=False)
     puede_ver_cotizaciones = models.BooleanField(default=False)
-
     # Catálogo
     puede_ver_clientes = models.BooleanField(default=False)
     puede_ver_productos = models.BooleanField(default=False)
@@ -17,7 +16,6 @@ class Rol(models.Model):
     puede_ver_cuentas = models.BooleanField(default=False)
     puede_ver_compras = models.BooleanField(default=False)
     puede_ver_proveedores = models.BooleanField(default=False)
-
     # Acciones
     puede_editar = models.BooleanField(default=False)
     puede_eliminar = models.BooleanField(default=False)

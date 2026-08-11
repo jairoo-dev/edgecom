@@ -169,7 +169,7 @@
             padding: 10px 8px;
             font-size: 10px;
             vertical-align: top;
-            color: #222;
+            color: #222;-
         }
         table.conceptos tbody tr:nth-child(even) {
             background-color: #f5f8fa;
@@ -277,8 +277,6 @@
     </style>
 </head>
 <body>
-
-    <!-- ENCABEZADO FIJO -->
     <div class="header">
         <div class="header-col logo">
             <img src="{{ logo_path }}" alt="EDGECOM">
@@ -288,8 +286,6 @@
             <div class="titulo">COTIZACIÓN</div>
         </div>
     </div>
-
-    <!-- PIE DE PÁGINA FIJO -->
     <div class="pie-pagina">
         {{ empresa.pie_pagina|default:"En caso de aprobación, emitir Orden de compra a nombre de EDGECOM S de RL de CV. La información contenida en este documento es confidencial." }}
         <div class="datos-bancarios">

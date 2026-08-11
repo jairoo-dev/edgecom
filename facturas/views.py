@@ -95,6 +95,9 @@ def agregar_factura(request):
             
             total_acumulado = Decimal('0.00')
             for detalle in partidas:
+                # Ignorar filas vacías sin producto ni servicio asignado
+                if detalle.producto is None and detalle.servicio is None:
+                    continue
                 detalle.save()
                 total_acumulado += detalle.total_con_iva()
                 
