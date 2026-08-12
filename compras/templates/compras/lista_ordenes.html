@@ -130,7 +130,7 @@
                         <tbody id="conceptosBody">
                             <tr class="fila-concepto">
                                 <td>
-                                    <select name="sku[]" class="form-select form-select-sm sku-select">
+                                    <select name="sku[]" class="form-select form-select-sm sku-select no-select2">
                                         <option value="">— SKU —</option>
                                         {% for p in productos %}
                                         <option value="{{ p.sku }}" data-desc="{{ p.descripcion }}" data-precio="{{ p.precio_unitario }}">{{ p.sku }}</option>
