@@ -90,19 +90,32 @@ def agregar_factura(request):
             factura.total = Decimal('0.00')
             factura.save()
             
-            formset.instance = factura
-            partidas = formset.save(commit=False)
-            
+            # Procesar cada formulario del formset directamente
+            # en lugar de usar save(commit=False) que falla con has_changed()
             total_acumulado = Decimal('0.00')
-            for detalle in partidas:
-                # Ignorar filas vacías sin producto ni servicio asignado
-                if detalle.producto is None and detalle.servicio is None:
+            for sub_form in formset.forms:
+                sku      = sub_form.cleaned_data.get('item_sku')
+                cantidad = sub_form.cleaned_data.get('cantidad')
+                precio   = sub_form.cleaned_data.get('precio_unitario')
+                
+                if not sku or not cantidad or not precio:
                     continue
+                
+                producto = Producto.objects.filter(sku=sku).first()
+                servicio = Servicio.objects.filter(sku=sku).first()
+                
+                if not producto and not servicio:
+                    continue
+                
+                detalle = DetalleFactura(
+                    factura=factura,
+                    producto=producto,
+                    servicio=servicio,
+                    cantidad=cantidad,
+                    precio_unitario=precio
+                )
                 detalle.save()
                 total_acumulado += detalle.total_con_iva()
-                
-            for obj in formset.deleted_objects:
-                obj.delete()
                 
             factura.total = round(total_acumulado, 2)
             factura.save()

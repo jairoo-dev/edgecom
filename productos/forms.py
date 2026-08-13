@@ -1,4 +1,5 @@
 from django import forms
+import html
 from .models import Producto
 
 class ProductoForm(forms.ModelForm):
@@ -12,3 +13,9 @@ class ProductoForm(forms.ModelForm):
             'unidad_sat': forms.TextInput(attrs={'class': 'form-control',}),
             'precio_unitario': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0.00'}),
         }
+
+    def clean_descripcion(self):
+        # Decodifica entidades HTML (&quot; &amp; etc.) que llegan al copiar texto
+        # desde páginas web, para que no se guarden literalmente.
+        descripcion = self.cleaned_data.get('descripcion', '')
+        return html.unescape(descripcion)

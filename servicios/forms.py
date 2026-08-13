@@ -1,4 +1,5 @@
 from django import forms
+import html
 from .models import Servicio
 
 class ServicioForm(forms.ModelForm):
@@ -12,3 +13,7 @@ class ServicioForm(forms.ModelForm):
             'unidad_sat': forms.TextInput(attrs={'class': 'form-control',}),
             'precio_unitario': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0.00'}),
         }
+
+    def clean_descripcion(self):
+        descripcion = self.cleaned_data.get('descripcion', '')
+        return html.unescape(descripcion)

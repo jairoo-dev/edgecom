@@ -93,7 +93,7 @@ class DetalleCotizacion(models.Model):
     sku = models.CharField(max_length=50)
     clave_sat = models.CharField(max_length=50)
     unidad_sat = models.CharField(max_length=50)
-    descripcion = models.CharField(max_length=200)
+    descripcion = models.CharField(max_length=500)
     cantidad = models.DecimalField(max_digits=10, decimal_places=2)
     precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)

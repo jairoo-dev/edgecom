@@ -5,6 +5,7 @@ urlpatterns = [
     path('', views.lista_cotizaciones, name='lista_cotizaciones'),
     path('agregar/', views.agregar_cotizacion, name='agregar_cotizacion'),
     path('editar/<str:folio>/', views.editar_cotizacion, name='editar_cotizacion'),
+    path('duplicar/<str:folio>/', views.duplicar_cotizacion, name='duplicar_cotizacion'),
     path('eliminar/<str:folio>/', views.eliminar_cotizacion, name='eliminar_cotizacion'),
     path('api/contacto/<int:pk>/', views.api_contacto, name='api_contacto'),
     path('api/producto/<str:sku>/', views.api_producto, name='api_producto'),

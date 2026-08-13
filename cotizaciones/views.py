@@ -6,6 +6,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from decimal import Decimal
 import os
+import html
 from django.conf import settings
 from weasyprint import HTML
 
@@ -140,7 +141,7 @@ def agregar_cotizacion(request):
                             sku=skus[i],
                             clave_sat=claves_sat[i],
                             unidad_sat=unidades_sat[i],
-                            descripcion=descripciones[i],
+                            descripcion=html.unescape(descripciones[i]),
                             cantidad=cantidad,
                             precio_unitario=precio,
                             subtotal=subtotal,
@@ -193,7 +194,7 @@ def editar_cotizacion(request, folio):
                         sku=skus[i],
                         clave_sat=claves_sat[i],
                         unidad_sat=unidades_sat[i],
-                        descripcion=descripciones[i],
+                        descripcion=html.unescape(descripciones[i]),
                         cantidad=cantidades[i],
                         precio_unitario=precios[i],
                         subtotal=subtotales[i],
@@ -211,6 +212,48 @@ def editar_cotizacion(request, folio):
         'productos': productos,
         'servicios': servicios,
     })
+
+@login_required(login_url='login')
+@permiso_requerido('puede_ver_cotizaciones')
+def duplicar_cotizacion(request, folio):
+    original = get_object_or_404(Cotizacion, folio=folio)
+    detalles = original.detalles.all()
+
+    # Crear nueva cotización copiando los campos de la original
+    nueva = Cotizacion(
+        rfc=original.rfc,
+        empresa=original.empresa,
+        contacto=original.contacto,
+        agente=original.agente,
+        solicitud=original.solicitud,
+        total=original.total,
+        status=None,  # Status en blanco para la nueva
+        iva=original.iva,
+        moneda=original.moneda,
+        forma_pago=original.forma_pago,
+        vigencia=original.vigencia,
+        tiempo_entrega=original.tiempo_entrega,
+        lugar_entrega=original.lugar_entrega,
+        cuenta=original.cuenta,
+        notas=original.notas,
+        creado_por=request.user,
+    )
+    nueva.save()
+
+    # Copiar los detalles
+    for detalle in detalles:
+        DetalleCotizacion.objects.create(
+            cotizacion=nueva,
+            sku=detalle.sku,
+            clave_sat=detalle.clave_sat,
+            unidad_sat=detalle.unidad_sat,
+            descripcion=detalle.descripcion,
+            cantidad=detalle.cantidad,
+            precio_unitario=detalle.precio_unitario,
+            subtotal=detalle.subtotal,
+        )
+
+    return redirect('editar_cotizacion', folio=nueva.folio)
 
 @login_required(login_url='login')
 @permiso_requerido('puede_eliminar')
